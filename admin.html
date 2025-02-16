@@ -15,9 +15,6 @@
                 Surveys
                 <span id="add-survey-btn" class="plus-circle">+</span>
             </button>
-            <div id="survey-dropdown" class="dropdown-menu">
-                <button id="create-survey">Create a New Survey</button>
-            </div>
             <button class="menu-btn">Research</button>
         </div>
         <div class="main-content">
@@ -26,6 +23,10 @@
                 <button onclick="logout()">Logout</button>
             </div>
             <p>Welcome to the Admin Dashboard</p>
+            <div id="survey-list">
+                <h3>Existing Surveys</h3>
+                <ul id="surveys-container"></ul>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
