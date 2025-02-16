@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a New Survey</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="survey-container">  
+        <label for="survey-title">Survey Title:</label>
+        <input type="text" id="survey-title" placeholder="Enter survey title">
+        <label for="survey-desc">Survey Description:</label>
+        <textarea id="survey-desc" placeholder="Enter a short description"></textarea>
+        <hr>
+
+        <!-- default questions -->
+        <div id="survey-questions">
+            <div class="question">
+                <label for="name">Name:</label>
+                <input type="text" id="name" placeholder="Enter your name">
+            </div>
+
+            <div class="question">
+                <label for="age">Age:</label>
+                <input type="number" id="age" placeholder="Enter your age">
+            </div>
+
+            <div class="question">
+                <label for="experience">Experience Level:</label>
+                <select id="experience">
+                    <option value="">Select experience level</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="resident">Resident</option>
+                    <option value="fellow">Fellow</option>
+                    <option value="physician">Physician</option>
+                </select>
+            </div>
+        </div>
+        <button id="add-question-btn">+ Add Question</button>
+        <button id="create-survey-btn">Create Survey</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
