@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
+const fetch = require('node-fetch')
 require('dotenv').config();
 
 const app = express();
@@ -158,5 +159,25 @@ app.get('/responses/:survey_id', async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: "Server error while fetching responses." });
+    }
+});
+
+app.get('/isic-images', async (req, res) => {
+    try {
+        const response = await fetch('https://api.isic-archive.com/api/v2/images', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`ISIC API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching ISIC images:', error.message);
+        res.status(500).json({ error: 'Failed to fetch ISIC images.' });
     }
 });

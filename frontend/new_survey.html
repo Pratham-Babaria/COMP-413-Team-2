@@ -44,6 +44,29 @@
 
         <button id="add-question-btn">+ Add Question</button>
         <button id="create-survey-btn">Create Survey</button>
+        
+        <hr>
+        <h3>Select a Lesion Image</h3>
+        
+        <label for="lesion-filter">Filter by Diagnosis:</label>
+        <select id="lesion-filter">
+            <option value="all">All</option>
+            <option value="malignant">Malignant</option>
+            <option value="benign">Benign</option>
+        </select>
+
+        <div id="lesion-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="close-lesion-selection">&times;</span>
+                <h2>Select a lesion image</h2>
+                <div id="lesion-container"></div>
+                <button id="submit-image">Submit Image</button>
+            </div>
+        </div>
+
+        <div id="selected-image-container">
+        </div>
+       
     </div>
 
     <script src="script.js"></script>
