@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create a New Survey</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- GazeRecorder API -->
+    <script src="https://api.gazerecorder.com/GazeCloudAPI.js"></script>
+    <!-- Heatmap.js for gaze visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heatmap.js/2.0.2/heatmap.min.js"></script>
 </head>
 <body>
     <div class="survey-container">  
@@ -47,7 +51,14 @@
         
         <hr>
         <h3>Select a Lesion Image</h3>
+
+        <button id="start-tracking-btn">Start Eye Tracking</button>
+
+        <div id="lesion-image-container">
+            <img src="images/skin_cancer.jpeg" alt="Lesion Example" id="lesion-image" width="300">
+        </div>
         
+        <button id="stop-tracking-btn">Stop Eye Tracking</button>
         <label for="lesion-filter">Filter by Diagnosis:</label>
         <select id="lesion-filter">
             <option value="all">All</option>
