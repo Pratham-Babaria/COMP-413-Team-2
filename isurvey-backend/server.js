@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
+const fetch = require('node-fetch')
 require('dotenv').config();
 
 const app = express();
@@ -64,6 +65,25 @@ app.post('/surveys', async (req, res) => {
     }
 });
 
+
+
+app.get('/surveys/:survey_id', async (req, res) => {
+    try {
+        const { survey_id } = req.params;
+        const surveys = await pool.query("SELECT * FROM surveys WHERE id = $1", [survey_id]);
+        if (surveys.rows.length === 0) {
+            return res.status(400).json({ error: "Survey ID does not exist." });
+        }
+
+        
+        res.json(surveys.rows[0]);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error while fetching surveys." });
+    }
+})
+
 app.get('/surveys', async (req, res) => {
     try {
         const surveys = await pool.query("SELECT * FROM surveys");
@@ -73,6 +93,8 @@ app.get('/surveys', async (req, res) => {
         res.status(500).json({ error: "Server error while fetching surveys." });
     }
 });
+
+
 
 app.post('/questions', async (req, res) => {
     try {
@@ -158,5 +180,25 @@ app.get('/responses/:survey_id', async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: "Server error while fetching responses." });
+    }
+});
+
+app.get('/isic-images', async (req, res) => {
+    try {
+        const response = await fetch('https://api.isic-archive.com/api/v2/images', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`ISIC API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching ISIC images:', error.message);
+        res.status(500).json({ error: 'Failed to fetch ISIC images.' });
     }
 });

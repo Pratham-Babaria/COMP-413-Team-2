@@ -260,3 +260,60 @@ button:hover {
         text-align: center;
     }
 }
+
+#lesion-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 600px;
+    height: 70%;
+    overflow-y: auto;
+}
+
+
+#lesion-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+#close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #888;
+}
+
+#close-modal-btn:hover {
+    color: #333;
+}
+
+.thumbnail {
+    width: 97px;
+    height: 97px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.selected-image {
+    width: 200px;
+    height: 200px;
+    display: block;
+    margin: 10px 0;
+}
+
