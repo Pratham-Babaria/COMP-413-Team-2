@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "target": "esnext",
+      "module": "esnext",
+      "strict": true,
+      "jsx": "react-jsx",
+      "moduleResolution": "node",
+      "baseUrl": "./src",
+      "paths": {
+        "@components/*": ["components/*"],
+        "@pages/*": ["components/pages/*"]
+      },
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "skipLibCheck": true
+    }
+  }
+  
