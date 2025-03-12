@@ -77,6 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = "new_survey.html";
         });
     }
+});
 
     const surveyQuestionsContainer = document.getElementById("survey-questions");
     const addQuestionButton = document.getElementById("add-question-btn");
@@ -91,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // fetch the lesion images and display them
     function fetchLesions() {
+        console.log("fetching");
         return fetch("http://localhost:5050/isic-images")
             .then(response => response.json())
             .then(data => {
@@ -131,8 +133,10 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedLesion = image;
     };
     
+    console.log(lesionFilter);
     // change lesion filter
     lesionFilter?.addEventListener("change", function () {
+        console.log("changed");
         const filterValue = document.getElementById('lesion-filter').value;
         fetchLesions().then(data => {
             let filteredImages = data.results;
@@ -165,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         lesionSelectionModal.style.display = "none";
     
-        const imgContainer = document.getElementById('selected-image-container');
+        const imgContainer = document.getElementById('lesion-image-container');
         imgContainer.innerHTML = '';
     
         // create and append the selected image
@@ -281,7 +285,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     loadSurveys();
-});
 });
 
 // eye tracking stuff
