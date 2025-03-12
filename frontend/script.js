@@ -282,6 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadSurveys();
 });
+});
 
 // eye tracking stuff
 document.addEventListener("DOMContentLoaded", function () {
