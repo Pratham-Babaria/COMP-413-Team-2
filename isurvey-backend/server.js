@@ -127,6 +127,31 @@ app.get('/questions', async (req, res) => {
     }
 });
 
+app.get('/surveys/:survey_id/questions', async (req, res) => {
+    try {
+        const { survey_id } = req.params;
+
+        const surveyCheck = await pool.query("SELECT * FROM surveys WHERE id = $1", [survey_id]);
+        if (surveyCheck.rows.length === 0) {
+            return res.status(400).json({ error: "Survey ID does not exist." });
+        }
+
+        const questions = await pool.query(
+            "SELECT * FROM questions WHERE survey_id = $1", 
+            [survey_id]
+        );
+
+        if (questions.rows.length === 0) {
+            return res.status(404).json({ error: "No questions found for this survey." });
+        }
+
+        res.json(questions.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error while fetching questions." });
+    }
+});
+
 app.post('/responses', async (req, res) => {
     try {
         const { survey_id, user_id, question_id, response_text } = req.body;
@@ -180,6 +205,64 @@ app.get('/responses/:survey_id', async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: "Server error while fetching responses." });
+    }
+});
+
+app.get('/surveys/:survey_id/responses', async (req, res) => {
+    try {
+        const { survey_id } = req.params;
+
+        const surveyCheck = await pool.query("SELECT * FROM surveys WHERE id = $1", [survey_id]);
+        if (surveyCheck.rows.length === 0) {
+            return res.status(400).json({ error: "Survey ID does not exist." });
+        }
+
+        const query = `
+            SELECT 
+                q.id AS question_id,
+                q.question_text,
+                r.id AS response_id,
+                r.response_text,
+                u.id AS user_id,
+                u.username
+            FROM responses r
+            JOIN questions q ON q.id = r.question_id
+            JOIN users u ON u.id = r.user_id
+            WHERE r.survey_id = $1
+            ORDER BY q.id;
+        `;
+        const result = await pool.query(query, [survey_id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "No responses found for this survey." });
+        }
+
+        const responsesByQuestion = {};
+        for (const row of result.rows) {
+            const { question_id, question_text, response_id, response_text, user_id, username } = row;
+            
+            if (!responsesByQuestion[question_id]) {
+                responsesByQuestion[question_id] = {
+                    question_id,
+                    question_text,
+                    answers: []
+                };
+            }
+
+            responsesByQuestion[question_id].answers.push({
+                response_id,
+                response_text,
+                user_id,
+                username
+            });
+        }
+
+        // 将结果转换为数组返回
+        const groupedResults = Object.values(responsesByQuestion);
+        res.json(groupedResults);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error while fetching survey responses." });
     }
 });
 
