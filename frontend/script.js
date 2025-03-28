@@ -1,5 +1,34 @@
+const API_BASE_URL = "http://localhost:5050"; 
+
+function assignSurvey(surveyId) {
+    const doctorIdInput = document.getElementById(`assign-doctor-${surveyId}`);
+    const doctorId = doctorIdInput.value.trim();
+
+    if (!doctorId) {
+        alert("Please enter a Doctor ID.");
+        return;
+    }
+
+    fetch(`${API_BASE_URL}/survey-assignments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ survey_id: surveyId, doctor_id: doctorId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(`Error: ${data.error}`);
+        } else {
+            alert(`✅ Assigned to Doctor ID ${doctorId}`);
+        }
+    })
+    .catch(err => console.error("Assignment error:", err));
+}
+
+window.assignSurvey = assignSurvey;
+
+
 document.addEventListener("DOMContentLoaded", function () {
-    const API_BASE_URL = "http://localhost:5050"; 
 
     const addSurveyBtn = document.getElementById("add-survey-btn");
 
@@ -51,13 +80,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 container.innerHTML = "";
                 surveys.forEach(survey => {
                     let li = document.createElement("li");
-                    li.innerHTML = `<strong>${survey.title}</strong> - ${survey.description} 
-                                    <button onclick="viewSurvey(${survey.id})">View</button>`;
+                    li.innerHTML = `
+                        <strong>${survey.title}</strong> - ${survey.description} 
+                        <button onclick="viewSurvey(${survey.id})">View</button>
+                        <br>
+                        <input type="number" id="assign-doctor-${survey.id}" placeholder="Doctor ID" style="margin-top:5px; margin-right:10px;">
+                        <button onclick="assignSurvey(${survey.id})">Assign</button>
+                    `;
+
                     container.appendChild(li);
                 });
             })
             .catch(err => console.error("Error fetching surveys:", err));
     }
+
+    
 
     document.getElementById("create-survey-btn")?.addEventListener("click", function () {
     const userName = localStorage.getItem("username");
@@ -285,6 +322,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     loadSurveys();
+
+    if (document.getElementById("doctor-surveys")) {
+        const doctorId = localStorage.getItem("user_id");
+    
+        fetch(`${API_BASE_URL}/survey-assignments/${doctorId}`)
+            .then(res => res.json())
+            .then(surveys => {
+                const container = document.getElementById("doctor-surveys");
+                container.innerHTML = "";
+                surveys.forEach(survey => {
+                    let li = document.createElement("li");
+                    li.innerHTML = `<strong>${survey.title}</strong> - ${survey.description}
+                                    <button onclick="fillSurvey(${survey.id})">Take Survey</button>`;
+                    container.appendChild(li);
+                });
+            })
+            .catch(err => console.error("Error loading assigned surveys:", err));
+    }
 });
 
 

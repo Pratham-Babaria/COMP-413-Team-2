@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
-const fetch = require('node-fetch')
+//const fetch = require('node-fetch')
 require('dotenv').config();
 
 const app = express();
@@ -22,6 +22,15 @@ app.post('/users', async (req, res) => {
             return res.status(400).json({ error: "Username and role are required." });
         }
 
+        const existingUser = await pool.query(
+            "SELECT * FROM users WHERE username = $1",
+            [username]
+        );
+
+        if (existingUser.rows.length > 0) {
+            return res.json(existingUser.rows[0]); // Treat this as login
+        }
+
         const newUser = await pool.query(
             "INSERT INTO users (username, role) VALUES ($1, $2) RETURNING *",
             [username, role]
@@ -30,7 +39,7 @@ app.post('/users', async (req, res) => {
         res.json(newUser.rows[0]);
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: "Server error while creating user." });
+        res.status(500).json({ error: "Server error while creating or logging in user." });
     }
 });
 
@@ -293,5 +302,50 @@ app.get('/isic-images', async (req, res) => {
     } catch (error) {
         console.error('Error fetching ISIC images:', error.message);
         res.status(500).json({ error: 'Failed to fetch ISIC images.' });
+    }
+});
+
+app.post('/survey-assignments', async (req, res) => {
+    try {
+        const { survey_id, doctor_id } = req.body;
+
+        const survey = await pool.query("SELECT * FROM surveys WHERE id = $1", [survey_id]);
+        const doctor = await pool.query("SELECT * FROM users WHERE id = $1 AND role = 'doctor'", [doctor_id]);
+
+        if (survey.rows.length === 0) {
+            return res.status(404).json({ error: "Survey not found." });
+        }
+
+        if (doctor.rows.length === 0) {
+            return res.status(404).json({ error: "Doctor not found or is not a doctor." });
+        }
+
+        const assignment = await pool.query(
+            "INSERT INTO survey_assignments (survey_id, doctor_id) VALUES ($1, $2) RETURNING *",
+            [survey_id, doctor_id]
+        );
+
+        res.json(assignment.rows[0]);
+    } catch (err) {
+        console.error("Error assigning survey:", err.message);
+        res.status(500).json({ error: "Server error while assigning survey." });
+    }
+});
+
+app.get('/survey-assignments/:doctor_id', async (req, res) => {
+    try {
+        const { doctor_id } = req.params;
+
+        const result = await pool.query(`
+            SELECT s.* 
+            FROM surveys s
+            INNER JOIN survey_assignments sa ON sa.survey_id = s.id
+            WHERE sa.doctor_id = $1
+        `, [doctor_id]);
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching assigned surveys:", err.message);
+        res.status(500).json({ error: "Server error while fetching assigned surveys." });
     }
 });
