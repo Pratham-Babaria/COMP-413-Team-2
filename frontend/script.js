@@ -1,29 +1,46 @@
 const API_BASE_URL = "http://localhost:5050"; 
 
 function assignSurvey(surveyId) {
-    const doctorIdInput = document.getElementById(`assign-doctor-${surveyId}`);
-    const doctorId = doctorIdInput.value.trim();
+    const doctorUsernameInput = document.getElementById(`assign-doctor-${surveyId}`);
+    const doctorUsername = doctorUsernameInput.value.trim();
 
-    if (!doctorId) {
-        alert("Please enter a Doctor ID.");
+    if (!doctorUsername) {
+        alert("Please enter a Doctor's username.");
         return;
     }
 
-    fetch(`${API_BASE_URL}/survey-assignments`, {
+    fetch(`${API_BASE_URL}/survey-assignments/username`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ survey_id: surveyId, doctor_id: doctorId })
+        body: JSON.stringify({ survey_id: surveyId, username: doctorUsername })
     })
-    .then(res => res.json())
+    .then(async res => {
+        const contentType = res.headers.get("content-type");
+    
+        if (!res.ok) {
+            const errorText = await res.text(); // try to get error body
+            throw new Error(`Server responded with error: ${res.status} ${res.statusText}\n${errorText}`);
+        }
+    
+        if (contentType && contentType.includes("application/json")) {
+            return res.json();
+        } else {
+            throw new Error("Expected JSON, but got something else.");
+        }
+    })
     .then(data => {
         if (data.error) {
             alert(`Error: ${data.error}`);
         } else {
-            alert(`✅ Assigned to Doctor ID ${doctorId}`);
+            alert(`✅ Assigned to Doctor ${doctorUsername}`);
         }
     })
-    .catch(err => console.error("Assignment error:", err));
+    .catch(err => {
+        console.error("Assignment error:", err.message);
+        alert(`Assignment error: ${err.message}`);
+    });
 }
+
 
 window.assignSurvey = assignSurvey;
 
@@ -84,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <strong>${survey.title}</strong> - ${survey.description} 
                         <button onclick="viewSurvey(${survey.id})">View</button>
                         <br>
-                        <input type="number" id="assign-doctor-${survey.id}" placeholder="Doctor ID" style="margin-top:5px; margin-right:10px;">
+                        <input type="text" id="assign-doctor-${survey.id}" placeholder="Doctor Username" style="margin-top:5px; margin-right:10px;">
                         <button onclick="assignSurvey(${survey.id})">Assign</button>
                     `;
 

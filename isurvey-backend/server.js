@@ -349,3 +349,39 @@ app.get('/survey-assignments/:doctor_id', async (req, res) => {
         res.status(500).json({ error: "Server error while fetching assigned surveys." });
     }
 });
+
+app.post('/survey-assignments/username', async (req, res) => {
+    try {
+        const { survey_id, username } = req.body;
+
+        if (!survey_id || !username) {
+            return res.status(400).json({ error: "survey_id and username are required." });
+        }
+
+        const doctorResult = await pool.query(
+            "SELECT id FROM users WHERE username = $1 AND role = 'doctor'",
+            [username]
+        );
+
+        if (doctorResult.rows.length === 0) {
+            return res.status(404).json({ error: "Doctor not found or not a doctor." });
+        }
+
+        const doctor_id = doctorResult.rows[0].id;
+
+        const survey = await pool.query("SELECT id FROM surveys WHERE id = $1", [survey_id]);
+        if (survey.rows.length === 0) {
+            return res.status(404).json({ error: "Survey not found." });
+        }
+
+        const assignment = await pool.query(
+            "INSERT INTO survey_assignments (survey_id, doctor_id) VALUES ($1, $2) RETURNING *",
+            [survey_id, doctor_id]
+        );
+
+        res.json(assignment.rows[0]);
+    } catch (err) {
+        console.error("Error assigning survey:", err.message);
+        res.status(500).json({ error: "Server error while assigning survey." });
+    }
+});
