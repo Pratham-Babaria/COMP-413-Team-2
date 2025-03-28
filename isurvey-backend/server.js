@@ -268,18 +268,28 @@ app.get('/surveys/:survey_id/responses', async (req, res) => {
 
 app.get('/isic-images', async (req, res) => {
     try {
-        const response = await fetch('https://api.isic-archive.com/api/v2/images', {
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
+        let allImages = [];
+        let cursor = null;
+        const limit = 100;
+        let apiUrl = `https://api.isic-archive.com/api/v2/images?limit=${limit}`;
+        let i = 0;
+        while (i < 20) { // 2000 images
+            const response = await fetch(apiUrl, {
+                headers: { 'Accept': 'application/json' }
+            });
 
-        if (!response.ok) {
-            throw new Error(`ISIC API error: ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`ISIC API error: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            allImages = [...allImages, ...data.results];
+            apiUrl = data.next;
+            if (!apiUrl) break;
+            i++;
         }
 
-        const data = await response.json();
-        res.json(data);
+        res.json({ results: allImages });
     } catch (error) {
         console.error('Error fetching ISIC images:', error.message);
         res.status(500).json({ error: 'Failed to fetch ISIC images.' });

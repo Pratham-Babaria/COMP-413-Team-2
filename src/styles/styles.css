@@ -327,3 +327,124 @@ button:hover {
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 620px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.modal-content {
+    .modal-content {
+        position: relative;
+        max-width: 600px; /* Ensure it doesn't get too wide */
+        padding: 10px; /* More padding to accommodate tooltips */
+        overflow: visible; /* Allow tooltips to extend beyond modal */
+    }
+}
+
+.lesion-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    overflow-y: auto;
+    max-height: 50vh; 
+    padding: 10px;
+    width: 100%;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.fixed-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+    border-top: 1px solid #ddd;
+}
+
+.lesion-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
+    gap: 10px;
+    justify-content: center; /* Center images */
+    padding: 10px;
+}
+
+.image-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content */
+}
+
+.thumbnail {
+    width: 120px; /* Adjust as needed */
+    height: auto;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.thumbnail:hover {
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px;
+    border-radius: 5px;
+    white-space: pre;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    z-index: 10;
+}
+
+.tooltip.left-edge {
+    transform: translateX(0%);
+    left: 0;
+}
+
+.tooltip.right-edge {
+    transform: translateX(0%);
+    left: auto;
+    right: 0;
+}
+
+.image-wrapper:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.thumbnail {
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+}
+
+.selected {
+    border: 3px solid blue;
+}
+
