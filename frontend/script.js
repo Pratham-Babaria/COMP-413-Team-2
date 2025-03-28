@@ -287,58 +287,84 @@ document.addEventListener("DOMContentLoaded", function () {
     loadSurveys();
 });
 
-// eye tracking stuff
+
 document.addEventListener("DOMContentLoaded", function () {
+    // debugging message
     console.log("DOM fully loaded. Waiting for user to start gaze tracking...");
 
     let gazeTrackingActive = false;
 
-    // create heatmap instance over the entire document
-    let heatmapInstance = h337.create({
-        container: document.body,
+    const lesionImage = document.getElementById("lesion-image");
+    const lesionContainer = document.getElementById("lesion-image-container");
+
+    // debugging message
+    if (!lesionImage) {
+        console.error("Lesion image not found.");
+    }
+    if (!lesionContainer) {
+        console.error("Lesion image container not found.");
+    }
+
+    // create heatmap instance for the image container
+    const heatmapInstance = h337.create({
+        container: lesionContainer,
         radius: 30,
         maxOpacity: 0.6,
         minOpacity: 0.2,
         blur: 0.75
     });
+    console.log("Heatmap instance created on lesion container.");
 
     function startGazeTracking() {
-        if (!gazeTrackingActive) {
-            console.log("Starting GazeCloudAPI eye tracking...");
-            GazeCloudAPI.StartEyeTracking();
-            gazeTrackingActive = true;
-
-            // get the start eye tracking button position
-            let button = document.getElementById("start-tracking-btn");
-            if (button) {
-                let buttonTop = button.getBoundingClientRect().top + window.scrollY;
-
-                // scroll to the button
-                window.scrollTo({ top: buttonTop - 100, behavior: "smooth" });
-
-                console.log("Scrolling to Start Eye Tracking button at:", buttonTop);
-            } else {
-                console.error("Start Eye Tracking button not found.");
-            }
-
-            GazeCloudAPI.OnResult = function (GazeData) {
-                if (GazeData.state === 0) { // 0 means valid gaze data
-                    let x = GazeData.docX;
-                    let y = GazeData.docY + window.scrollY; 
-
-                    console.log(`Gaze detected at: (${x}, ${y})`);
-
-                    // add data to heatmap
-                    heatmapInstance.addData({ x: x, y: y, value: 1 });
-                }
-            };
-
-            GazeCloudAPI.OnError = function (error) {
-                console.error("GazeCloudAPI Error:", error);
-            };
-        } else {
+        if (gazeTrackingActive) {
             console.log("Gaze tracking is already active.");
+            return;
         }
+
+        console.log("Starting GazeCloudAPI eye tracking...");
+        GazeCloudAPI.StartEyeTracking();
+        gazeTrackingActive = true;
+
+        GazeCloudAPI.OnResult = function (GazeData) {
+            console.log("Gaze data received:", GazeData);
+
+            if (GazeData.state === 0) {
+                let gazeX = GazeData.GazeX;
+                let gazeY = GazeData.GazeY;
+
+
+                console.log(`Absolute Gaze Coordinates: (${gazeX}, ${gazeY})`);
+
+                // Get image bounding box
+                const rect = lesionImage.getBoundingClientRect();
+                const imgLeft = rect.left;
+                const imgTop = rect.top;
+                const imgRight = rect.right;
+                const imgBottom = rect.bottom;
+
+
+                console.log(`🖼 Lesion image bounds:
+                    Left: ${imgLeft}, Top: ${imgTop}, Right: ${imgRight}, Bottom: ${imgBottom}`);
+
+                // Check if gaze is within image
+                if (gazeX >= imgLeft && gazeX <= imgRight && gazeY >= imgTop && gazeY <= imgBottom) {
+                    const localX = gazeX - imgLeft;
+                    const localY = gazeY - imgTop;
+
+                    console.log(`Gaze is on the lesion image (local coords): (${localX}, ${localY})`);
+
+                    heatmapInstance.addData({ x: localX, y: localY, value: 1 });
+                } else {
+                    console.log("Gaze is outside the lesion image.");
+                }
+            } else {
+                console.log(`Gaze data state is not 0 (state = ${GazeData.state})`);
+            }
+        };
+
+        GazeCloudAPI.OnError = function (error) {
+            console.error("GazeCloudAPI Error:", error);
+        };
     }
 
     function stopGazeTracking() {
@@ -351,7 +377,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Attach event listeners
     document.getElementById("start-tracking-btn").addEventListener("click", startGazeTracking);
     document.getElementById("stop-tracking-btn").addEventListener("click", stopGazeTracking);
 });
