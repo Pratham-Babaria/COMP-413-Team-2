@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaPlus, FaCog } from "react-icons/fa";
 
-const Admin: React.FC = () => {
+export default function Admin() {
     const [surveys, setSurveys] = useState<{ title: string; description: string }[]>([]);
     const navigate = useNavigate();
     const adminName = localStorage.getItem("username") || "Admin";
@@ -17,35 +18,66 @@ const Admin: React.FC = () => {
     };
 
     return (
-        <div className="dashboard">
-            <div className="sidebar">
-                <h3>Admin Panel</h3>
-                <button className="menu-btn">Approvals</button>
-                <button className="menu-btn" onClick={() => navigate("/new-survey")}>
-                    Surveys <span className="plus-circle">+</span>
-                </button>
-                <button className="menu-btn">Research</button>
+        <div className="flex flex-col h-screen bg-teal-100">
+            {/* Navbar */}
+            <div className="flex justify-between items-center bg-blue-500 text-white p-4 rounded-lg m-4">
+                <div className="flex gap-4">
+                    <button 
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                        onClick={() => navigate("/research")}
+                    >
+                        Research
+                    </button>
+                    <button 
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                        onClick={() => navigate("/new-survey")}
+                    > Surveys
+                    </button>
+                    <button 
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                        onClick={() => navigate("/approvals")}
+                    >
+                        Approvals
+                    </button>
+                </div>
+                <div className="flex items-center gap-4">
+                    <span className="text-lg font-bold">{adminName}</span>
+                    <button className="text-white hover:text-gray-200" onClick={logout}>Logout</button>
+                    <button className="text-white text-xl">
+                    </button>
+                </div>
             </div>
-            <div className="main-content">
-                <div className="header">
-                    <span>{adminName}</span>
-                    <button onClick={logout}>Logout</button>
+
+            {/* Content Area */}
+            <div className="flex-grow m-4 p-4 bg-gray-200 rounded-lg">
+                <div className="flex flex-col gap-4">
+                    <div className="p-4 bg-white rounded-lg shadow">
+                        <h3 className="text-2xl text-blue-600 font-bold mb-4">Existing Surveys</h3>
+                        <ul className="space-y-2">
+                            {surveys.map((survey, index) => (
+                                <li 
+                                    key={index} 
+                                    className="flex justify-between items-center bg-gray-100 p-3 rounded-lg hover:bg-gray-200 transition"
+                                >
+                                    <div>
+                                        <strong>{survey.title}</strong> - {survey.description}
+                                    </div>
+                                    <button 
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition"
+                                    >
+                                        View
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
-                <p>Welcome to the Admin Dashboard</p>
-                <div id="survey-list">
-                    <h3>Existing Surveys</h3>
-                    <ul>
-                        {surveys.map((survey, index) => (
-                            <li key={index}>
-                                <strong>{survey.title}</strong> - {survey.description}
-                                <button>View</button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-blue-500 text-white text-center p-4 rounded-lg m-4 font-bold text-xl">
+                iSurvey
             </div>
         </div>
     );
-};
-
-export default Admin;
+}

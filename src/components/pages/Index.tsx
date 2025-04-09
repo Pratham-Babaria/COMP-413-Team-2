@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaLock } from "react-icons/fa";
 import logo from "../../images/dermiq.png";
 import "../../styles/styles.css";
 
@@ -26,7 +25,8 @@ const Index: React.FC = () => {
                 {/* <h2 className="login-title">Login</h2> */}
 
                 <div className="input-icon">
-                    <FaUser />
+                    {/* removed "<FaLock />" cause I had dependency issues while merging 
+                    -- find other icon to use */}
                     <input
                         type="text"
                         placeholder="Username"
@@ -36,7 +36,8 @@ const Index: React.FC = () => {
                 </div>
 
                 <div className="input-icon">
-                    <FaLock />
+                    {/* removed "<FaLock />" cause I had dependency issues while merging
+                    find other icon to use */}
                     <input
                         type="password"
                         placeholder="Password"
