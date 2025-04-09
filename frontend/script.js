@@ -65,28 +65,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function login(userType) {
         const username = document.getElementById("username")?.value.trim();
-        if (!username) {
-            alert("Please enter your name.");
-            return;
+        const password = document.getElementById("password")?.value.trim();
+      
+        if (!username || !password) {
+          alert("Please enter username and password.");
+          return;
         }
-
-        fetch(`${API_BASE_URL}/users`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, role: userType })
+      
+        fetch(`${API_BASE_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, role: userType })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                localStorage.setItem("user_id", data.id);
-                localStorage.setItem("username", username);
-                window.location.href = userType === "admin" ? "admin.html" : "doctor.html";
-            }
+          if (data.error) {
+            alert(data.error);
+          } else {
+            localStorage.setItem("user_id", data.id);
+            localStorage.setItem("username", username);
+            window.location.href = userType === "admin" ? "admin.html" : "doctor.html";
+          }
         })
-        .catch(err => console.error("Error logging in:", err));
-    }
+        .catch(err => console.error("Login error:", err));
+      }
+      
 
     function loadSurveys() {
         fetch(`${API_BASE_URL}/surveys`)

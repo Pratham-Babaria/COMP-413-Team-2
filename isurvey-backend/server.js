@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
+const bcrypt = require("bcrypt");
 //const fetch = require('node-fetch')
 require('dotenv').config();
 
@@ -14,34 +15,54 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-app.post('/users', async (req, res) => {
+// Register new user
+app.post("/register", async (req, res) => {
+    const { username, password, role } = req.body;
+
     try {
-        const { username, role } = req.body;
+        const hashed = await bcrypt.hash(password, 10);
 
-        if (!username || !role) {
-            return res.status(400).json({ error: "Username and role are required." });
-        }
-
-        const existingUser = await pool.query(
-            "SELECT * FROM users WHERE username = $1",
-            [username]
-        );
-
+        const existingUser = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
         if (existingUser.rows.length > 0) {
-            return res.json(existingUser.rows[0]); // Treat this as login
+            return res.status(400).json({ error: "Username already exists" });
         }
 
         const newUser = await pool.query(
-            "INSERT INTO users (username, role) VALUES ($1, $2) RETURNING *",
-            [username, role]
+            "INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING *",
+            [username, hashed, role]
         );
 
         res.json(newUser.rows[0]);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Server error while creating or logging in user." });
+        console.error("Register error:", err);
+        res.status(500).json({ error: "Registration failed" });
     }
 });
+
+// Login user
+app.post("/login", async (req, res) => {
+    const { username, password, role } = req.body;
+
+    try {
+        const userRes = await pool.query("SELECT * FROM users WHERE username = $1 AND role = $2", [username, role]);
+        if (userRes.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid username or role" });
+        }
+
+        const user = userRes.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ error: "Incorrect password" });
+        }
+
+        res.json({ id: user.id, username: user.username, role: user.role });
+    } catch (err) {
+        console.error("Login error:", err);
+        res.status(500).json({ error: "Login failed" });
+    }
+});
+
 
 app.get('/users', async (req, res) => {
     try {
