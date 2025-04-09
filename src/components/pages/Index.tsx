@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
-// import logo from "../../images/dermiq.png";
+import logo from "../../images/dermiq.png";
 import "../../styles/styles.css";
 
 const Index: React.FC = () => {
@@ -22,7 +22,7 @@ const Index: React.FC = () => {
     return (
         <div className="login-wrapper">
             <div className="login-card">
-                {/* <img src={logo} alt="DermIQ Logo" className="logo" /> */}
+                <img src={logo} alt="DermIQ Logo" className="logo" />
                 {/* <h2 className="login-title">Login</h2> */}
 
                 <div className="input-icon">
@@ -68,4 +68,5 @@ const Index: React.FC = () => {
         </div>
     );
 };
-export default Index
+
+export default Index;
