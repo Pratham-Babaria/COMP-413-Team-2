@@ -385,3 +385,44 @@ app.post('/survey-assignments/username', async (req, res) => {
         res.status(500).json({ error: "Server error while assigning survey." });
     }
 });
+
+app.post('/gaze-data', async (req, res) => {
+    try {
+        const {
+            user_id,
+            survey_id,
+            question_id,
+            image_width,
+            image_height,
+            gaze_x,
+            gaze_y,
+            timestamp
+        } = req.body;
+
+        const query = `
+            INSERT INTO gaze_data (
+                user_id, survey_id, question_id,
+                image_width, image_height, gaze_x, gaze_y, timestamp
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING *;
+        `;
+
+        const values = [
+            user_id,
+            survey_id,
+            question_id,
+            image_width,
+            image_height,
+            gaze_x,
+            gaze_y,
+            timestamp
+        ];
+
+        const result = await pool.query(query, values);
+        res.status(201).json(result.rows[0]);
+        console.log("Gaze data successfully received:", req.body);
+    } catch (err) {
+        console.error("Error inserting gaze data:", err.message);
+        res.status(500).json({ error: "Failed to store gaze data" });
+    }
+});

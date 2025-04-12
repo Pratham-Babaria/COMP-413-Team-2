@@ -50,9 +50,6 @@ const NewSurvey: React.FC = () => {
         };
     }, []);
 
-
-
-
     useEffect(() => {
         heatmapInstances.current = heatmapRefs.current.map((container) =>
             container
@@ -119,6 +116,7 @@ const NewSurvey: React.FC = () => {
 
         gazePoints.current = [];
     };
+
 
     const startTracking = (index: number) => {
         if (gazeTrackingActive.current) return;
