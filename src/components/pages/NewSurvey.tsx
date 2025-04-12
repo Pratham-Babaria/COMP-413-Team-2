@@ -213,91 +213,115 @@ const NewSurvey: React.FC = () => {
     };
 
     return (
-        <div className="survey-container">
-            <h2>Create a New Survey</h2>
-
-            <label>Survey Title:</label>
-            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-
-            <label>Survey Description:</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-
-            <hr />
-
-            <h3>Survey Questions:</h3>
-            {questions.map((q, i) => (
-                <div key={i} className="question">
-                    <label>{q.text}</label>
-                    {q.image && (
-                        <>
-                            <div
-                                ref={(el) => { heatmapRefs.current[i] = el; }}
-                                style={{ position: "relative", width: "fit-content" }}
-                            >
-                                <img
-                                    ref={(el) => { imageRefs.current[i] = el; }}
-                                    src={q.image}
-                                    alt={`Lesion ${i}`}
-                                    className="selected-lesion"
-                                />
-                            </div>
-                            <>
-                                <button onClick={() => startTracking(i)}>Start Eye Tracking</button>
-                                <button onClick={stopTracking} style={{ marginLeft: "10px" }}>
-                                    Stop Eye Tracking
-                                </button>
-                            </>
-                        </>
-                    )}
-                    <input type="text" placeholder="Answer here" />
-                </div>
-            ))}
-
-            <button onClick={addQuestion}>+ Add Question</button>
-            <button onClick={addDiagnosticQuestion}>+ Add Diagnostic Question</button>
-            <button onClick={createSurvey}>Create Survey</button>
-
-            {showModal && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <span className="close-btn" onClick={() => setShowModal(false)}>&times;</span>
-                        <h2>Select a Lesion Image</h2>
-                        <div className="lesion-container">
-                            {lesions.length === 0 ? <p>Loading images...</p> : (
-                                lesions.map((image, index) => (
-                                    <div
-                                        key={index}
-                                        className="image-wrapper"
-                                        onMouseEnter={() => {
-                                            setHoveredImageId(image.isic_id);
-                                            const isLeftEdge = index % 4 === 0;
-                                            const isRightEdge = index % 4 === 3;
-                                            setTooltipPosition(isLeftEdge ? "left-edge" : isRightEdge ? "right-edge" : "");
-                                        }}
-                                        onMouseLeave={() => setHoveredImageId(null)}
-                                        style={{ position: "relative" }}
-                                    >
+        <div className="min-h-screen bg-gray-100 px-4 py-8 flex justify-center">
+            {/* Survey header "Create a New Survey" */}
+            <div className="w-full max-w-3xl bg-white rounded-lg shadow p-8">
+                <h2 className="text-3xl font-bold text-center text-blue-600 mb-8">
+                    Create a New Survey
+                </h2>
+    
+                {/* Survey title */}
+                <label className="block text-lg font-semibold text-gray-700 mb-2">Survey Title:</label>
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+    
+                {/* Survey description */}
+                <label className="block text-lg font-semibold text-gray-700 mb-2">Survey Description:</label>
+                <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    rows={4}
+                />
+    
+                <h3 className="text-xl text-blue-600 font-semibold mb-4">Survey Questions:</h3>
+                <div className="space-y-6">
+                    {questions.map((q, i) => (
+                        <div key={i} className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                            <label className="block font-semibold text-gray-800 mb-2">{q.text}</label>
+                            {q.image && (
+                                <div className="mb-4">
+                                    <div ref={(el) => { heatmapRefs.current[i] = el; }} className="relative w-fit">
                                         <img
-                                            src={image.files.thumbnail_256.url}
-                                            alt={image.attribution || 'Lesion'}
-                                            className={`thumbnail ${selectedLesion?.src === image.files.thumbnail_256.url ? "selected" : ""}`}
-                                            onClick={(e) => selectImage(e.currentTarget)}
+                                            ref={(el) => { imageRefs.current[i] = el; }}
+                                            src={q.image}
+                                            alt={`Lesion ${i}`}
+                                            className="rounded-lg max-w-full"
                                         />
-                                        {hoveredImageId === image.isic_id && (
-                                            <div className={`tooltip ${tooltipPosition}`}>
-                                                <p><strong>Age:</strong> {image.metadata.clinical.age_approx || "N/A"}</p>
-                                                <p><strong>Diagnosis:</strong> {image.metadata.clinical.diagnosis_1 || "Unknown"}</p>
-                                                <p><strong>Site:</strong> {image.metadata.clinical.anatom_site_general}</p>
-                                            </div>
-                                        )}
                                     </div>
-                                ))
+                                    <div className="mt-2 flex gap-4">
+                                        <button onClick={() => startTracking(i)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                            Start Eye Tracking
+                                        </button>
+                                        <button onClick={stopTracking} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                                            Stop Eye Tracking
+                                        </button>
+                                    </div>
+                                </div>
                             )}
+                            <input type="text" placeholder="Answer here" className="w-full px-3 py-2 border border-gray-300 rounded-md" />
                         </div>
-                        <button onClick={submitDiagnosticQuestion}>Submit</button>
-                    </div>
+                    ))}
                 </div>
-            )}
+    
+                {/* Add Question Buttons */}
+                <div className="mt-6 flex flex-wrap gap-4">
+                    <button onClick={addQuestion} className="bg-blue-100 text-blue-700 px-4 py-2 rounded hover:bg-blue-200">
+                        + Add Question
+                    </button>
+                    <button onClick={addDiagnosticQuestion} className="bg-purple-100 text-purple-700 px-4 py-2 rounded hover:bg-purple-200">
+                        + Add Diagnostic Question
+                    </button>
+                    <button onClick={createSurvey} className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 ml-auto">
+                        Create Survey
+                    </button>
+                </div>
+    
+                {/* Modal for Lesion Selection */}
+                {showModal && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div className="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+                            <span className="absolute top-4 right-4 text-xl cursor-pointer text-gray-600 hover:text-black" onClick={() => setShowModal(false)}>&times;</span>
+                            <h2 className="text-xl font-bold mb-4 text-center">Select a Lesion Image</h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                {lesions.length === 0 ? (
+                                    <p className="text-center">Loading images...</p>
+                                ) : (
+                                    lesions.map((image, index) => (
+                                        <div key={index} className="relative cursor-pointer group">
+                                            <img
+                                                src={image.files.thumbnail_256.url}
+                                                alt={image.attribution || 'Lesion'}
+                                                className={`w-full rounded-md border-2 ${selectedLesion?.src === image.files.thumbnail_256.url ? 'border-blue-500' : 'border-transparent'} group-hover:opacity-75`}
+                                                onClick={(e) => selectImage(e.currentTarget)}
+                                            />
+                                            {hoveredImageId === image.isic_id && (
+                                                <div className={`absolute bg-white text-sm text-gray-800 border rounded shadow p-2 z-10 ${tooltipPosition}`}>
+                                                    <p><strong>Age:</strong> {image.metadata.clinical.age_approx || "N/A"}</p>
+                                                    <p><strong>Diagnosis:</strong> {image.metadata.clinical.diagnosis_1 || "Unknown"}</p>
+                                                    <p><strong>Site:</strong> {image.metadata.clinical.anatom_site_general}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <div className="mt-6 flex justify-end">
+                                <button
+                                    onClick={submitDiagnosticQuestion}
+                                    className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
