@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserMenu from "./userMenu";
 import ConfirmDeletionModal from "./confirmDeletion";
+import {styles} from "../../styles/sharedStyles";
 
 /**
  * Admin dashboard component for admins to create, upload,
@@ -25,18 +26,13 @@ export default function Admin() {
         setSurveys(storedSurveys);
     }, []);
 
-
-    const handleDeleteSurvey = (index: number) => {
-        setSurveyToDeleteIndex(index);
-        setShowDeleteModal(true);
-    };
-
+    // Function updates the state of the surveys when user confirms survey deletion
     const confirmSurveyDeletion = () => {
         if (surveyToDeleteIndex === null) {
             return;
         }
         // add the surveys we don't want to delete to a new list
-        const updatedSurveys: {title: string; description: string}[] = [];
+        const updatedSurveys: { title: string; description: string }[] = [];
         for (let i = 0; i < surveys.length; i++) {
             if (i !== surveyToDeleteIndex) {
                 updatedSurveys.push(surveys[i]);
@@ -47,52 +43,61 @@ export default function Admin() {
         localStorage.setItem("surveys", JSON.stringify(updatedSurveys)) // TODO: INTEGRATE W BACKEND
         setShowDeleteModal(false);
         setSurveyToDeleteIndex(null);
+    };
 
-    }
-
-    const cancelDelete = () => {
+    // Triggers when user cancels the deletion of their survey
+    const cancelDeleteSurvey = () => {
         setShowDeleteModal(false);
         setSurveyToDeleteIndex(null);
     };
 
-    // Helper function to render content based on whether there are surveys
+    // Upon pressing the delete survey button, we display the delete modal and find the idx to delete.
+    const handleDeleteSurvey = (index: number) => {
+        setSurveyToDeleteIndex(index);
+        setShowDeleteModal(true);
+    };
+
+    /**
+     * Helper functions that helps render the main content in the page (displaying surveys).
+     * When there are no available surveys, we will have a more intuitive layout for admins
+     * to add a survey.
+     */
     const renderSurveyList = () => {
         if (surveys.length === 0) {
             return (
                 <div className="text-center py-12">
-                    <p className="text-lg text-gray-700 mb-4">
+                    <p className={styles.emptyStateText}>
                         There are no surveys uploaded. Be the first to upload one!
                     </p>
                     <button
                         onClick={() => navigate("/new-survey")}
-                        className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition"
+                        className={styles.createSurveyBtn}
                     >
                         + Create Survey
                     </button>
                 </div>
             );
         }
-
         return (
             <>
                 <ul className="space-y-2">
                     {surveys.map((survey, index) => (
                         <li
                             key={index}
-                            className="flex justify-between items-center bg-gray-100 p-3 rounded-lg hover:bg-gray-200 transition"
+                            className={styles.surveyCardClass}
                         >
                             <div>
                                 <strong>{survey.title}</strong> - {survey.description}
                             </div>
                             <div className="flex gap-2">
                                 <button
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition"
+                                    className={styles.takeSurveyBtn}
                                     onClick={() => console.log("View survey", index)}
                                 >
                                     View
                                 </button>
                                 <button
-                                    className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition"
+                                    className={styles.deleteSurveyBtn}
                                     onClick={() => handleDeleteSurvey(index)}
                                 >
                                     Delete
@@ -101,11 +106,10 @@ export default function Admin() {
                         </li>
                     ))}
                 </ul>
-
                 <div className="mt-6 flex justify-start">
                     <button
                         onClick={() => navigate("/new-survey")}
-                        className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition"
+                        className={styles.createSurveyBtn}
                     >
                         + New Survey
                     </button>
@@ -114,38 +118,34 @@ export default function Admin() {
         );
     };
 
-    const navButtonClass = "flex items-center gap-2 px-4 py-2 bg-blue-400 rounded-full hover:bg-blue-600 transition text-white";
-    const panelClass = "p-4 rounded-lg shadow";
-    const sectionPadding = "m-4 px-4 py-6";
-
     return (
-        <div className="flex flex-col h-screen bg-[#e5f2fb]">
+        <div className={styles.fullPageClass}>
             {/* Navbar */}
-            <div className={`flex justify-between items-center bg-blue-500 text-white ${sectionPadding}`}>
+            <div className={styles.navBarClass}>
                 <div className="flex gap-4">
-                    <button className={navButtonClass} onClick={() => navigate("/research")}>Research</button>
-                    <button className={navButtonClass} onClick={() => navigate("/new-survey")}>Surveys</button>
-                    <button className={navButtonClass} onClick={() => navigate("/approvals")}>Approvals</button>
+                    <button className={styles.navButtonClass} onClick={() => navigate("/research")}>Research</button>
+                    <button className={styles.navButtonClass} onClick={() => navigate("/new-survey")}>Surveys</button>
+                    <button className={styles.navButtonClass} onClick={() => navigate("/approvals")}>Approvals</button>
                 </div>
                 <UserMenu username={adminName} />
             </div>
 
             {/* Content Area */}
-            <div className={`flex-grow bg-gray-200 rounded-lg ${sectionPadding}`}>
+            <div className={`${styles.contentAreaClass} ${styles.sectionPadding}`}>
                 <div className="flex flex-col gap-4">
-                    <div className={`bg-white ${panelClass}`}>
-                        <h3 className="text-2xl text-blue-600 font-bold mb-4">Surveys</h3>
+                    <div className={`bg-white ${styles.panelClass}`}>
+                        <h3 className={styles.cardHeaderClass}>Surveys</h3>
                         {renderSurveyList()}
                     </div>
                 </div>
             </div>
 
-            {/* Modular Delete Confirmation Modal */}
+            {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <ConfirmDeletionModal
                     title="Delete Survey"
                     message="Are you sure you want to delete this survey? This action cannot be undone."
-                    onCancel={cancelDelete}
+                    onCancel={cancelDeleteSurvey}
                     onConfirm={confirmSurveyDeletion}
                 />
             )}
