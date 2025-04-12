@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
+/**
+ * Doctor dashboard component. Doctor users should
+ * be able to view and submit surveys.
+ */
 const Doctor: React.FC = () => {
     const [surveys, setSurveys] = useState<{ title: string; description: string }[]>([]);
     const navigate = useNavigate();
