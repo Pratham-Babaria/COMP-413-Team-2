@@ -13,22 +13,6 @@ const NewSurvey: React.FC = () => {
     const [tooltipPosition, setTooltipPosition] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const navigate = useNavigate();
-    useEffect(() => {
-        const script = document.createElement("script");
-        script.src = "https://api.gazerecorder.com/GazeCloudAPI.js";
-        script.async = true;
-        script.onload = () => {
-            console.log("✅ GazeCloudAPI loaded");
-        };
-        script.onerror = () => {
-            console.error("❌ Failed to load GazeCloudAPI");
-        };
-        document.body.appendChild(script);
-    
-        return () => {
-            document.body.removeChild(script);
-        };
-    }, []);
     
 
     const heatmapRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -36,6 +20,24 @@ const NewSurvey: React.FC = () => {
     const heatmapInstances = useRef<any[]>([]);
     const gazeTrackingActive = useRef(false);
     const [trackingIndex, setTrackingIndex] = useState<number | null>(null);
+    const gazePoints = useRef<any[]>([]);
+
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://api.gazerecorder.com/GazeCloudAPI.js";
+        script.async = true;
+        script.onload = () => {
+            console.log("GazeCloudAPI loaded");
+        };
+        script.onerror = () => {
+            console.error("Failed to load GazeCloudAPI");
+        };
+        document.body.appendChild(script);
+    
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     useEffect(() => {
         heatmapInstances.current = heatmapRefs.current.map((container) =>
@@ -50,6 +52,60 @@ const NewSurvey: React.FC = () => {
                 : null
         );        
     }, [questions]);
+
+    const saveGazeData = async (questionIndex: number) => {
+        console.log("Saving gaze points");
+
+        const userId = localStorage.getItem("userId");
+        const surveyId = localStorage.getItem("currentSurveyId");
+        const questionId = questionIndex + 1; // assuming it's 1-indexed in DB
+        const imageEl = imageRefs.current[questionIndex];
+
+        if (!userId || !surveyId || !questionId || !imageEl) {
+            console.warn("Missing values:");
+            if (!userId) console.warn("userId is missing");
+            if (!surveyId) console.warn("surveyId is missing");
+            if (!questionId) console.warn("questionId is missing");
+            if (!imageEl) console.warn("imageEl is missing");
+            return;
+        }
+
+        const imageWidth = imageEl.offsetWidth;
+        const imageHeight = imageEl.offsetHeight;
+
+        if (!gazePoints.current.length) {
+            console.warn("No gaze points to save");
+            return;
+        }
+
+        for (const point of gazePoints.current) {
+            const payload = {
+                user_id: parseInt(userId),
+                survey_id: parseInt(surveyId),
+                question_id: questionId,
+                gaze_x: point.gaze_x,
+                gaze_y: point.gaze_y,
+                timestamp: point.timestamp,
+                image_width: imageWidth,
+                image_height: imageHeight
+            };
+
+            console.log("saving gaze point", payload); // debugging
+
+            try {
+                await fetch("http://localhost:5050/gaze-data", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                console.error("Failed to store gaze data", error);
+            }
+        }
+
+        gazePoints.current = [];
+    };
+
 
     const startTracking = (index: number) => {
         if (gazeTrackingActive.current) return;
@@ -82,16 +138,24 @@ const NewSurvey: React.FC = () => {
             if (gazeX >= left && gazeX <= right && gazeY >= top && gazeY <= bottom) {
                 const localX = gazeX - left;
                 const localY = gazeY - top;
+                gazePoints.current.push({ gaze_x: localX, gaze_y: localY, timestamp: Date.now() });
+                console.log("Gaze point:", { localX, localY, timestamp: Date.now() });
                 heatmap.addData({ x: localX, y: localY, value: 1 });
             }
         };
     };
     
 
-    const stopTracking = () => {
+    const stopTracking = async () => {
         if (!gazeTrackingActive.current) return;
         window.GazeCloudAPI.StopEyeTracking();
         gazeTrackingActive.current = false;
+
+        if (trackingIndex !== null) {
+            console.log("Stopping tracking for question", trackingIndex);
+            console.log("Number of gaze points:", gazePoints.current.length); 
+            await saveGazeData(trackingIndex); 
+        }
         setTrackingIndex(null);
     };
 
@@ -177,10 +241,12 @@ const NewSurvey: React.FC = () => {
                                     className="selected-lesion"
                                 />
                             </div>
-                            <button onClick={() => startTracking(i)}>Start Eye Tracking</button>
-                            <button onClick={stopTracking} style={{ marginLeft: "10px" }}>
-                                Stop Eye Tracking
-                            </button>
+                            <>
+                                <button onClick={() => startTracking(i)}>Start Eye Tracking</button>
+                                <button onClick={stopTracking} style={{ marginLeft: "10px" }}>
+                                    Stop Eye Tracking
+                                </button>
+                            </>
                         </>
                     )}
                     <input type="text" placeholder="Answer here" />
