@@ -10,14 +10,37 @@ const Index: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (userType: "admin" | "doctor") => {
+    const handleLogin = async (userType: "admin" | "doctor") => {
         if (!username.trim() || !password.trim()) {
             setShowModal(true);
             return;
         }
+    
         localStorage.setItem("username", username);
+    
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE}/users`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: username,
+                    role: userType
+                })
+            });
+    
+            const data = await response.json();
+            if (data.id) {
+                localStorage.setItem("userId", data.id);  // Save for later use
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            alert("Login failed. Please try again.");
+            return;
+        }
+    
         navigate(userType === "admin" ? "/admin" : "/doctor");
     };
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-gray-100">
