@@ -266,7 +266,7 @@ app.get('/surveys/:survey_id/responses', async (req, res) => {
             });
         }
 
-        // 将结果转换为数组返回
+        
         const groupedResults = Object.values(responsesByQuestion);
         res.json(groupedResults);
     } catch (err) {
@@ -426,3 +426,29 @@ app.post('/gaze-data', async (req, res) => {
         res.status(500).json({ error: "Failed to store gaze data" });
     }
 });
+
+app.delete('/surveys/:survey_id', async (req, res) => {
+    try {
+        const { survey_id } = req.params;
+
+        const surveyCheck = await pool.query('SELECT * FROM surveys WHERE id = $1', [survey_id]);
+        if (surveyCheck.rows.length === 0) {
+            return res.status(404).json({ error: 'Survey not found.' });
+        }
+
+
+        const deleteResult = await pool.query(
+            'DELETE FROM surveys WHERE id = $1 RETURNING *',
+            [survey_id]
+        );
+
+        res.json({
+            message: 'Survey successfully deleted',
+            deletedSurvey: deleteResult.rows[0]
+        });
+    } catch (err) {
+        console.error('Error deleting survey:', err.message);
+        res.status(500).json({ error: 'Server error while deleting survey.' });
+    }
+});
+
