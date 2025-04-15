@@ -33,6 +33,8 @@ const NewSurvey: React.FC = () => {
     const gazeTrackingActive = useRef(false);
     const [trackingIndex, setTrackingIndex] = useState<number | null>(null);
     const gazePoints = useRef<any[]>([]);
+    const [assignedUsernames, setAssignedUsernames] = useState("");
+
     useEffect(() => {
         const script = document.createElement("script");
         script.src = "https://api.gazerecorder.com/GazeCloudAPI.js";
@@ -233,17 +235,94 @@ const NewSurvey: React.FC = () => {
         handleAddDiagnosticQuestion();
     };
 
-    const createSurvey = () => {
+
+    const createSurvey = async () => {
         if (!title.trim() || !description.trim()) {
-            alert("Please enter a survey title and description!");
-            return;
+          alert("Please enter a survey title and description!");
+          return;
         }
-        const surveys = JSON.parse(localStorage.getItem("surveys") || "[]");
-        surveys.push({ title, description, questions });
-        localStorage.setItem("surveys", JSON.stringify(surveys));
-        alert("Survey created successfully!");
-        navigate("/admin");
-    };
+      
+        // To do: Get the user ID
+        const userId = "1"; // temporary user id
+        if (!userId) {
+          alert("You must be logged in or have a valid userId before creating a survey.");
+          return;
+        }
+      
+        try {
+          // Create the survey in the DB
+          const surveyRes = await fetch("http://localhost:5050/surveys", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              description,
+              created_by: parseInt(userId, 10), // or whatever your backend needs
+            }),
+          });
+      
+          if (!surveyRes.ok) {
+            const errorData = await surveyRes.json();
+            throw new Error(errorData.error || "Failed to create survey.");
+          }
+      
+          const newSurvey = await surveyRes.json(); 
+          // newSurvey should have { id, title, description, created_by }
+      
+          // Create each question in the DB (POST /questions with survey_id)
+          for (const q of questions) {
+            const questionRes = await fetch("http://localhost:5050/questions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                survey_id: newSurvey.id,         // Link question to the newly created survey
+                question_text: q.text           // The textual prompt
+
+              }),
+            });
+      
+            if (!questionRes.ok) {
+              const errorData = await questionRes.json();
+              throw new Error(errorData.error || "Failed to create question.");
+            }
+          }
+
+          if (assignedUsernames.trim()) {
+            const doctorNames = assignedUsernames
+              .split(",")
+              .map(name => name.trim())
+              .filter(Boolean);
+
+            for (const docName of doctorNames) {
+              try {
+                const assignRes = await fetch("http://localhost:5050/survey-assignments/username", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    survey_id: newSurvey.id,
+                    username: docName,
+                  }),
+                });
+                if (!assignRes.ok) {
+                  const errData = await assignRes.json();
+                  console.warn(`Failed to assign survey to ${docName}:`, errData.error);
+                }
+              } catch (assignError) {
+                console.error("Error assigning survey:", assignError);
+              }
+            }
+          }
+      
+          // Store newSurvey.id in localStorage for later usage (e.g., gaze tracking)
+          localStorage.setItem("currentSurveyId", newSurvey.id);
+      
+          alert("Survey created successfully!");
+          navigate("/admin");
+        } catch (error: any) {
+          console.error("Error creating survey:", error.message);
+          alert(`Failed to create survey: ${error.message}`);
+        }
+      };
 
     return (
         <div className="min-h-screen bg-gray-100 px-4 py-8 flex justify-center">
@@ -270,7 +349,16 @@ const NewSurvey: React.FC = () => {
                     className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                     rows={4}
                 />
-    
+
+                <label className="block text-lg font-semibold text-gray-700 mb-2">Assign to these doctors (comma-separated):</label>
+                <input
+                    type="text"
+                    value={assignedUsernames}
+                    onChange={(e) => setAssignedUsernames(e.target.value)}
+                    className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="e.g. drsmith, drjones"
+                />
+
                 <h3 className="text-xl text-blue-600 font-semibold mb-4">Survey Questions:</h3>
                 <div className="space-y-6">
                     {questions.map((q, i) => (

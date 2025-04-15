@@ -307,10 +307,10 @@ app.get('/isic-images', async (req, res) => {
 
 app.post('/survey-assignments', async (req, res) => {
     try {
-        const { survey_id, doctor_id } = req.body;
+        const { survey_id, user_id } = req.body;
 
         const survey = await pool.query("SELECT * FROM surveys WHERE id = $1", [survey_id]);
-        const doctor = await pool.query("SELECT * FROM users WHERE id = $1 AND role = 'doctor'", [doctor_id]);
+        const doctor = await pool.query("SELECT * FROM users WHERE id = $1 AND role = 'doctor'", [user_id]);
 
         if (survey.rows.length === 0) {
             return res.status(404).json({ error: "Survey not found." });
@@ -321,8 +321,8 @@ app.post('/survey-assignments', async (req, res) => {
         }
 
         const assignment = await pool.query(
-            "INSERT INTO survey_assignments (survey_id, doctor_id) VALUES ($1, $2) RETURNING *",
-            [survey_id, doctor_id]
+            "INSERT INTO survey_assignments (survey_id, user_id) VALUES ($1, $2) RETURNING *",
+            [survey_id, user_id]
         );
 
         res.json(assignment.rows[0]);
@@ -332,16 +332,16 @@ app.post('/survey-assignments', async (req, res) => {
     }
 });
 
-app.get('/survey-assignments/:doctor_id', async (req, res) => {
+app.get('/survey-assignments/:user_id', async (req, res) => {
     try {
-        const { doctor_id } = req.params;
+        const { user_id } = req.params;
 
         const result = await pool.query(`
             SELECT s.* 
             FROM surveys s
             INNER JOIN survey_assignments sa ON sa.survey_id = s.id
-            WHERE sa.doctor_id = $1
-        `, [doctor_id]);
+            WHERE sa.user_id = $1
+        `, [user_id]);
 
         res.json(result.rows);
     } catch (err) {
@@ -367,7 +367,7 @@ app.post('/survey-assignments/username', async (req, res) => {
             return res.status(404).json({ error: "Doctor not found or not a doctor." });
         }
 
-        const doctor_id = doctorResult.rows[0].id;
+        const user_id = doctorResult.rows[0].id;
 
         const survey = await pool.query("SELECT id FROM surveys WHERE id = $1", [survey_id]);
         if (survey.rows.length === 0) {
@@ -375,8 +375,8 @@ app.post('/survey-assignments/username', async (req, res) => {
         }
 
         const assignment = await pool.query(
-            "INSERT INTO survey_assignments (survey_id, doctor_id) VALUES ($1, $2) RETURNING *",
-            [survey_id, doctor_id]
+            "INSERT INTO survey_assignments (survey_id, user_id) VALUES ($1, $2) RETURNING *",
+            [survey_id, user_id]
         );
 
         res.json(assignment.rows[0]);

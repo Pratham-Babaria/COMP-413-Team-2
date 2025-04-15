@@ -4,6 +4,14 @@ import UserMenu from "./userMenu";
 import ConfirmDeletionModal from "./confirmDeletion";
 import {styles} from "../../styles/sharedStyles";
 
+
+interface Survey {
+    id: number;
+    title: string;
+    description: string;
+    created_by: number;
+  }
+
 /**
  * Admin dashboard component for admins to create, upload,
  * view, and delete surveys.
@@ -11,7 +19,7 @@ import {styles} from "../../styles/sharedStyles";
 export default function Admin() {
 
     // keeps track of the state of the page
-    const [surveys, setSurveys] = useState<{ title: string; description: string }[]>([]); // surveys
+    const [surveys, setSurveys] = useState<Survey[]>([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false); // admin decides to delete a survey
 
     // keeps track of idx of survey to delete
@@ -20,29 +28,53 @@ export default function Admin() {
     
     const adminName = localStorage.getItem("username") || "admin";
 
-    // Load saved surveys
+    // Load surveys
     useEffect(() => {
-        const storedSurveys = JSON.parse(localStorage.getItem("surveys") || "[]");
-        setSurveys(storedSurveys);
-    }, []);
+        fetch("http://localhost:5050/surveys")
+          .then((res) => res.json())
+          .then((data: Survey[]) => {
+            setSurveys(data);
+          })
+          .catch(console.error);
+      }, []);
 
     // Function updates the state of the surveys when user confirms survey deletion
-    const confirmSurveyDeletion = () => {
+    const confirmSurveyDeletion = async () => {
         if (surveyToDeleteIndex === null) {
             return;
         }
-        // add the surveys we don't want to delete to a new list
-        const updatedSurveys: { title: string; description: string }[] = [];
-        for (let i = 0; i < surveys.length; i++) {
-            if (i !== surveyToDeleteIndex) {
-                updatedSurveys.push(surveys[i]);
-            }
+
+        // Get the `id` of the survey we want to delete
+        const surveyId = surveys[surveyToDeleteIndex]?.id;
+        if (!surveyId) {
+            console.error("Survey ID not found in state");
+            return;
         }
-        // update the current set of surveys, and remove delete pop-up
-        setSurveys(updatedSurveys);
-        localStorage.setItem("surveys", JSON.stringify(updatedSurveys)) // TODO: INTEGRATE W BACKEND
-        setShowDeleteModal(false);
-        setSurveyToDeleteIndex(null);
+
+        try {
+            const response = await fetch(`http://localhost:5050/surveys/${surveyId}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to delete survey.");
+            }
+
+            const result = await response.json();
+            console.log("Survey deleted:", result);
+
+            // Remove from local state
+            const updatedSurveys = surveys.filter((_, idx) => idx !== surveyToDeleteIndex);
+            setSurveys(updatedSurveys);
+
+            // Close modal
+            setShowDeleteModal(false);
+            setSurveyToDeleteIndex(null);
+        } catch (err) {
+            console.error("Error deleting survey");
+            alert("Failed to delete survey. Check console for more details.");
+        }
     };
 
     // Triggers when user cancels the deletion of their survey

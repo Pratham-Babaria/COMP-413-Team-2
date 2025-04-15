@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import UserMenu from "./userMenu";
 import { styles } from "../../styles/sharedStyles";
 
+
+interface Survey {
+    id: number;
+    title: string;
+    description: string;
+    created_by: number;
+}
+
+
 /**
  * Doctor dashboard component. Doctor users should
  * be able to view and submit surveys.
@@ -10,16 +19,28 @@ import { styles } from "../../styles/sharedStyles";
 export default function Doctor() {
 
     // Surveys available to the doctor
-    const [surveys, setSurveys] = useState<{ title: string; description: string }[]>([]);
+    const [surveys, setSurveys] = useState<Survey[]>([]);
     const navigate = useNavigate();
     const doctorName = localStorage.getItem("username") || "Doctor";
+    const doctorId = "1"; // To do: get doctor id when log in
 
-    // Load saved surveys
     useEffect(() => {
-        // need to integrate with backend!!!
-        const storedSurveys = JSON.parse(localStorage.getItem("surveys") || "[]");
-        setSurveys(storedSurveys);
-    }, []);
+        
+        fetch(`http://localhost:5050/survey-assignments/${doctorId}`)
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error("Failed to fetch assigned surveys");
+            }
+            return res.json();
+          })
+          .then((data: Survey[]) => {
+            // The endpoint returns an array of surveys assigned to this doctor
+            setSurveys(data);
+          })
+          .catch((err) => {
+            console.error("Error fetching assigned surveys:", err);
+          });
+      }, [doctorId]);
 
     // Renders either the list of surveys or a helpful empty-state message
     const renderSurveyList = () => {
@@ -48,7 +69,7 @@ export default function Doctor() {
                         </div>
                         <button
                             className={styles.takeSurveyBtn}
-                            onClick={() => console.log("Taking survey", index)}
+                            onClick={() => navigate(`/doctor/surveys/${survey.id}`)}
                         >
                             Take Survey
                         </button>
