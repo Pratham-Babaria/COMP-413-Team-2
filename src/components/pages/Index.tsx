@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
+import { auth } from "../../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import logo from "../../images/dermiq.png";
 import "../../styles/styles.css";
 
@@ -15,7 +17,20 @@ const Index: React.FC = () => {
             setShowModal(true);
             return;
         }
-        localStorage.setItem("username", username);
+        signInWithEmailAndPassword(auth, username, password)
+            .then((userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                if (user.email != null){
+                    localStorage.setItem("username", username);
+                }
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                setShowModal(true);
+            });
         navigate(userType === "admin" ? "/admin" : "/doctor");
     };
 

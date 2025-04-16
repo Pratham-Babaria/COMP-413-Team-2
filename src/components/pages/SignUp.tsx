@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock, FaCheck} from "react-icons/fa";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
 import logo from "../../images/dermiq.png";
 import "../../styles/styles.css";
+
+//need more informative error messages
 
 const SignUp: React.FC = () => {
     const [username, setUsername] = useState("");
@@ -22,7 +26,19 @@ const SignUp: React.FC = () => {
             setShowModal(true);
             return;
         }
-        localStorage.setItem("username", username);
+        createUserWithEmailAndPassword(auth, username, password)
+            .then((userCredential) => {
+                // Signed up 
+                const user = userCredential.user;
+                if (user.email != null){
+                    localStorage.setItem("username", user.email);
+                }
+                // ...
+            })
+            .catch((error) => {
+                setShowModal(true);
+                // ..
+            });
         navigate(userType === "admin" ? "/admin" : "/doctor");
     };
 

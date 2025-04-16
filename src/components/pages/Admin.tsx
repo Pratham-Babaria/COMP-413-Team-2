@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 const Admin: React.FC = () => {
@@ -12,8 +14,12 @@ const Admin: React.FC = () => {
     }, []);
 
     const logout = () => {
-        localStorage.removeItem("username");
-        navigate("/");
+        signOut(auth).then(() => {
+            localStorage.removeItem("username");
+            navigate("/");
+          }).catch((error) => {
+            console.log("Error in logout procedure.")
+          });
     };
 
     return (
