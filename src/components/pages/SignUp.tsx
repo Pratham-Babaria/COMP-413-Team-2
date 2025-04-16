@@ -18,11 +18,13 @@ const SignUp: React.FC = () => {
 
     const handleSignUp = (userType: "admin" | "doctor") => {
         if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
+            console.log("here?")
             setShowModal(true);
             return;
         }
         if (password !== confirmPassword) {
             //add something here to make an informative modal
+            console.log("here???")
             setShowModal(true);
             return;
         }
@@ -31,15 +33,18 @@ const SignUp: React.FC = () => {
                 // Signed up 
                 const user = userCredential.user;
                 if (user.email != null){
+                    console.log(user.email)
                     localStorage.setItem("username", user.email);
+                    navigate(userType === "admin" ? "/admin" : "/doctor");
                 }
                 // ...
             })
             .catch((error) => {
+                console.log('Error signing in:', error);
                 setShowModal(true);
                 // ..
             });
-        navigate(userType === "admin" ? "/admin" : "/doctor");
+
     };
 
     const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {

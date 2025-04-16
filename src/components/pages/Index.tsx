@@ -23,15 +23,16 @@ const Index: React.FC = () => {
                 const user = userCredential.user;
                 if (user.email != null){
                     localStorage.setItem("username", username);
+                    navigate(userType === "admin" ? "/admin" : "/doctor");
                 }
                 // ...
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
+                console.log('Error signing in:', error);
                 setShowModal(true);
             });
-        navigate(userType === "admin" ? "/admin" : "/doctor");
     };
 
     return (
