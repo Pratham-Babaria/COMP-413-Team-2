@@ -1,23 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaLock } from "react-icons/fa";
+import { FaUser, FaLock, FaCheck} from "react-icons/fa";
 import logo from "../../images/dermiq.png";
 import "../../styles/styles.css";
 
-const Index: React.FC = () => {
+const SignUp: React.FC = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [passwordsMatch, setPasswordsMatch] = useState(true);
     const navigate = useNavigate();
 
-    const handleLogin = (userType: "admin" | "doctor") => {
-        if (!username.trim() || !password.trim()) {
+    const handleSignUp = (userType: "admin" | "doctor") => {
+        if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
+            setShowModal(true);
+            return;
+        }
+        if (password !== confirmPassword) {
+            //add something here to make an informative modal
             setShowModal(true);
             return;
         }
         localStorage.setItem("username", username);
         navigate(userType === "admin" ? "/admin" : "/doctor");
     };
+
+    const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setConfirmPassword(e.target.value);
+    
+        // Check if passwords match in real-time
+        setPasswordsMatch(e.target.value === password);
+      };
 
     return (
         <div className="login-wrapper">
@@ -45,13 +59,31 @@ const Index: React.FC = () => {
                     />
                 </div>
 
+                <div className="input-icon">
+                    <FaCheck />
+                    <input
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={handleConfirmPasswordChange}
+                        style={{
+                            borderColor: !passwordsMatch ? "red" : "initial",
+                        }}
+                    />
+                    {!passwordsMatch && (
+                        <span style={{ color: "red", fontSize: "12px" }}>
+                            Passwords do not match
+                        </span>
+                    )}
+                </div>
+
                 <div className="button-group">
-                    <button onClick={() => handleLogin("admin")}>Login as Admin</button>
-                    <button onClick={() => handleLogin("doctor")}>Login as Doctor</button>
+                    <button onClick={() => handleSignUp("admin")}>Register as Admin</button>
+                    <button onClick={() => handleSignUp("doctor")}>Register as Doctor</button>
                 </div>
 
                 <p className="signup-text">
-                    Don’t have an account?<span onClick={() => navigate("/signup")} className="signup-link">Sign Up</span>
+                    <span onClick={() => navigate("/")} className="signup-link">Back to Login</span>
                 </p>
             </div>
 
@@ -69,4 +101,4 @@ const Index: React.FC = () => {
     );
 };
 
-export default Index;
+export default SignUp;
