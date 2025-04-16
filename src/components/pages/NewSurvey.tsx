@@ -481,43 +481,70 @@ const NewSurvey: React.FC = () => {
                 {/* Modal for Lesion Selection */}
                 {showAddDiagnosticQuestionModal && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                        <div className="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-                            <span className="absolute top-4 right-4 text-xl cursor-pointer text-gray-600 hover:text-black" onClick={() => setShowAddDiagnosticQuestionModal(false)}>&times;</span>
-                            <h2 className="text-xl font-bold mb-4 text-center">Select a Lesion Image</h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {lesions.length === 0 ? (
-                                    <p className="text-center">Loading images...</p>
-                                ) : (
-                                    lesions.map((image, index) => (
-                                        <div key={index} className="relative cursor-pointer group">
-                                            <img
-                                                src={image.files.thumbnail_256.url}
-                                                alt={image.attribution || 'Lesion'}
-                                                className={`w-full rounded-md border-2 ${selectedLesion?.src === image.files.thumbnail_256.url ? 'border-blue-500' : 'border-transparent'} group-hover:opacity-75`}
-                                                onClick={(e) => selectImage(e.currentTarget)}
-                                            />
-                                            {hoveredImageId === image.isic_id && (
-                                                <div className={`absolute bg-white text-sm text-gray-800 border rounded shadow p-2 z-10 ${tooltipPosition}`}>
-                                                    <p><strong>Age:</strong> {image.metadata.clinical.age_approx || "N/A"}</p>
-                                                    <p><strong>Diagnosis:</strong> {image.metadata.clinical.diagnosis_1 || "Unknown"}</p>
-                                                    <p><strong>Site:</strong> {image.metadata.clinical.anatom_site_general}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                            <div className="mt-6 flex justify-end">
-                                <button
-                                    onClick={submitDiagnosticQuestion}
-                                    className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                        <div className="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col relative">
+                        <span
+                            className="absolute top-4 right-4 text-xl cursor-pointer text-gray-600 hover:text-black"
+                            onClick={() => setShowAddDiagnosticQuestionModal(false)}
+                        >
+                            &times;
+                        </span>
+                        <h2 className="text-xl font-bold mb-4 text-center">Select a Lesion Image</h2>
+
+                        {/* Scrollable image section */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto" style={{ maxHeight: '60vh' }}>
+                            {lesions.length === 0 ? (
+                            <p className="text-center col-span-full">Loading images...</p>
+                            ) : (
+                            lesions.map((image, index) => (
+                                <div
+                                  key={index}
+                                  className="relative cursor-pointer group"
+                                  onMouseEnter={() => {
+                                    setHoveredImageId(image.isic_id);
+                                    const isLeftEdge = index % 4 === 0;
+                                    const isRightEdge = index % 4 === 3;
+                                    setTooltipPosition(isLeftEdge ? "left-0" : isRightEdge ? "right-0" : "left-1/2 -translate-x-1/2");
+                                  }}
+                                  onMouseLeave={() => setHoveredImageId(null)}
                                 >
-                                    Submit
-                                </button>
+                                  <img
+                                    src={image.files.thumbnail_256.url}
+                                    alt={image.attribution || 'Lesion'}
+                                    className={`w-full rounded-md border-2 ${
+                                      selectedLesion?.src === image.files.thumbnail_256.url
+                                        ? 'border-blue-500'
+                                        : 'border-transparent'
+                                    } group-hover:opacity-75`}
+                                    onClick={(e) => selectImage(e.currentTarget)}
+                                  />
+                              
+                                  {hoveredImageId === image.isic_id && (
+                                    <div className={`absolute top-full mt-1 ${tooltipPosition} bg-white text-sm text-gray-800 border rounded shadow p-2 z-10`}>
+                                      <p><strong>Age:</strong> {image.metadata.clinical.age_approx || "N/A"}</p>
+                                      <p><strong>Diagnosis:</strong> {image.metadata.clinical.diagnosis_1 || "Unknown"}</p>
+                                      <p><strong>Site:</strong> {image.metadata.clinical.anatom_site_general || "N/A"}</p>
+                                    </div>
+                                  )}
+                                </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Fixed footer */}
+                        <div className="mt-4 pt-4 border-t sticky bottom-0 bg-white z-10">
+                            <div className="flex justify-end">
+                            <button
+                                onClick={submitDiagnosticQuestion}
+                                className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                            >
+                                Submit
+                            </button>
                             </div>
                         </div>
+                        </div>
                     </div>
-                )}
+                    )}
+
             </div>
         </div>
     );
