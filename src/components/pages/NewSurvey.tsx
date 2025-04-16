@@ -272,13 +272,15 @@ const NewSurvey: React.FC = () => {
           // Create each question in the DB (POST /questions with survey_id)
           for (const q of questions) {
             const questionRes = await fetch("http://localhost:5050/questions", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                survey_id: newSurvey.id,         // Link question to the newly created survey
-                question_text: q.text           // The textual prompt
-
-              }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  survey_id: newSurvey.id,
+                  question_text: q.text,
+                  question_type: q.type,
+                  options: q.options || null,
+                  image_url: q.image || null
+                }),
             });
       
             if (!questionRes.ok) {

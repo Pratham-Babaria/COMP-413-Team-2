@@ -53,6 +53,8 @@ app.get('/users', async (req, res) => {
     }
 });
 
+
+
 app.post('/surveys', async (req, res) => {
     try {
         const { title, description, created_by } = req.body;
@@ -107,7 +109,7 @@ app.get('/surveys', async (req, res) => {
 
 app.post('/questions', async (req, res) => {
     try {
-        const { survey_id, question_text } = req.body;
+        const { survey_id, question_text, question_type, options, image_url } = req.body;
 
         const surveyCheck = await pool.query("SELECT * FROM surveys WHERE id = $1", [survey_id]);
         if (surveyCheck.rows.length === 0) {
@@ -115,8 +117,9 @@ app.post('/questions', async (req, res) => {
         }
 
         const newQuestion = await pool.query(
-            "INSERT INTO questions (survey_id, question_text) VALUES ($1, $2) RETURNING *",
-            [survey_id, question_text]
+        `INSERT INTO questions (survey_id, question_text, question_type, options, image_url)
+        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [survey_id, question_text, question_type, options || null, image_url || null]
         );
 
         res.json(newQuestion.rows[0]);
