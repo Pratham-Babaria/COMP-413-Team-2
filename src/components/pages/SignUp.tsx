@@ -12,19 +12,19 @@ const SignUp: React.FC = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [passwordsMatch, setPasswordsMatch] = useState(true);
     const navigate = useNavigate();
 
     const handleSignUp = (userType: "admin" | "doctor") => {
         if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
-            console.log("here?")
+            setErrorMsg("Missing info: Please enter both a username and password before logging in.");
             setShowModal(true);
             return;
         }
         if (password !== confirmPassword) {
-            //add something here to make an informative modal
-            console.log("here???")
+            setErrorMsg("Passwords do not match! Try again.")
             setShowModal(true);
             return;
         }
@@ -40,7 +40,13 @@ const SignUp: React.FC = () => {
                 // ...
             })
             .catch((error) => {
-                console.log('Error signing in:', error);
+                if (error.code ===  "auth/invalid-email") {
+                    setErrorMsg("Invalid email address. Please try again.")
+                }
+                if (error.code === "auth/password-does-not-meet-requirements"){
+                    setErrorMsg("Password must be between 6 and 20 characters. Please try again.")
+                }
+                console.log('Error signing up:', error.code);
                 setShowModal(true);
                 // ..
             });
@@ -112,8 +118,8 @@ const SignUp: React.FC = () => {
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>Missing Info</h3>
-                        <p>Please enter both a username and password before logging in.</p>
+                        <h3>Error</h3>
+                        <p>{errorMsg}</p>
                         <button className="modal-button" onClick={() => setShowModal(false)}>OK</button>
                     </div>
                 </div>

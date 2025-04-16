@@ -9,11 +9,13 @@ import "../../styles/styles.css";
 const Index: React.FC = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
     const [showModal, setShowModal] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = (userType: "admin" | "doctor") => {
         if (!username.trim() || !password.trim()) {
+            setErrorMsg("Missing info: Please enter both a username and password before logging in.")
             setShowModal(true);
             return;
         }
@@ -28,9 +30,13 @@ const Index: React.FC = () => {
                 // ...
             })
             .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log('Error signing in:', error);
+                if (error.code ===  "auth/invalid-email") {
+                    setErrorMsg("Invalid email address. Please try again.")
+                }
+                if (error.code ===  "auth/invalid-credential") {
+                    setErrorMsg("Incorrect username or password. Please try again.")
+                }
+                console.log('Error signing in:', error.code);
                 setShowModal(true);
             });
     };
@@ -75,8 +81,8 @@ const Index: React.FC = () => {
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>Missing Info</h3>
-                        <p>Please enter both a username and password before logging in.</p>
+                        <h3>Error</h3>
+                        <p>{errorMsg}</p>
                         <button className="modal-button" onClick={() => setShowModal(false)}>OK</button>
                     </div>
                 </div>
