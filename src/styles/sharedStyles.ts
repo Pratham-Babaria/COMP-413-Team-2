@@ -24,6 +24,9 @@ export const styles = {
   
     // Typography
     cardHeaderClass: "text-2xl text-blue-600 font-bold mb-4",
-    emptyStateText: "text-lg text-gray-700 mb-4"
+    emptyStateText: "text-lg text-gray-700 mb-4",
+
+    // Eye tracking dot
+    gazeDot: "fixed w-3 h-3 bg-red-500 rounded-full pointer-events-none z-[9999]",
 };
   

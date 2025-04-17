@@ -216,6 +216,68 @@ app.post('/responses', async (req, res) => {
     }
 });
 
+app.get('/responses', async (req, res) => {
+    try {
+        const { survey_id, user_id, question_id } = req.query;
+
+        let query = 'SELECT * FROM responses WHERE 1=1';
+        const values = [];
+
+        if (survey_id) {
+            values.push(survey_id);
+            query += ` AND survey_id = $${values.length}`;
+        }
+
+        if (user_id) {
+            values.push(user_id);
+            query += ` AND user_id = $${values.length}`;
+        }
+
+        if (question_id) {
+            values.push(question_id);
+            query += ` AND question_id = $${values.length}`;
+        }
+
+        const result = await pool.query(query, values);
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error("Error fetching responses:", err.message);
+        res.status(500).json({ error: "Failed to fetch responses" });
+    }
+});
+
+app.delete('/responses', async (req, res) => {
+    try {
+        const { survey_id, user_id, question_id } = req.query;
+
+        if (!survey_id) {
+            return res.status(400).json({ error: "survey_id is required to delete responses." });
+        }
+
+        let query = 'DELETE FROM responses WHERE survey_id = $1';
+        const values = [survey_id];
+
+        if (user_id) {
+            values.push(user_id);
+            query += ` AND user_id = $${values.length}`;
+        }
+
+        if (question_id) {
+            values.push(question_id);
+            query += ` AND question_id = $${values.length}`;
+        }
+
+        const result = await pool.query(query + ' RETURNING *', values);
+        res.json({
+            message: `Deleted ${result.rowCount} response(s).`,
+            deleted: result.rows
+        });
+    } catch (err) {
+        console.error("Error deleting responses:", err.message);
+        res.status(500).json({ error: "Failed to delete responses." });
+    }
+});
+
 app.get('/responses/:survey_id', async (req, res) => {
     try {
         const { survey_id } = req.params;
@@ -410,7 +472,7 @@ app.post('/survey-assignments/username', async (req, res) => {
     }
 });
 
-app.post('/gaze-data', async (req, res) => {
+app.post('/gaze_data', async (req, res) => {
     try {
         const {
             user_id,
@@ -450,6 +512,69 @@ app.post('/gaze-data', async (req, res) => {
         res.status(500).json({ error: "Failed to store gaze data" });
     }
 });
+
+app.get('/gaze_data', async (req, res) => {
+    try {
+        const { survey_id, user_id, question_id } = req.query;
+
+        let query = 'SELECT * FROM gaze_data WHERE 1=1';
+        const values = [];
+
+        if (survey_id) {
+            values.push(survey_id);
+            query += ` AND survey_id = $${values.length}`;
+        }
+
+        if (user_id) {
+            values.push(user_id);
+            query += ` AND user_id = $${values.length}`;
+        }
+
+        if (question_id) {
+            values.push(question_id);
+            query += ` AND question_id = $${values.length}`;
+        }
+
+        const result = await pool.query(query, values);
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error("Error fetching gaze data:", err.message);
+        res.status(500).json({ error: "Failed to fetch gaze data" });
+    }
+});
+
+app.delete('/gaze_data', async (req, res) => {
+    try {
+        const { survey_id, user_id, question_id } = req.query;
+
+        if (!survey_id) {
+            return res.status(400).json({ error: "survey_id is required to delete gaze data." });
+        }
+
+        let query = 'DELETE FROM gaze_data WHERE survey_id = $1';
+        const values = [survey_id];
+
+        if (user_id) {
+            values.push(user_id);
+            query += ` AND user_id = $${values.length}`;
+        }
+
+        if (question_id) {
+            values.push(question_id);
+            query += ` AND question_id = $${values.length}`;
+        }
+
+        const result = await pool.query(query + ' RETURNING *', values);
+        res.json({
+            message: `Deleted ${result.rowCount} gaze data point(s).`,
+            deleted: result.rows
+        });
+    } catch (err) {
+        console.error("Error deleting gaze data:", err.message);
+        res.status(500).json({ error: "Failed to delete gaze data." });
+    }
+});
+
 
 app.delete('/surveys/:survey_id', async (req, res) => {
     try {
