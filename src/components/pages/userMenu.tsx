@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLogOut, FiSettings } from "react-icons/fi";
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
 
 /**
  * Re-usable component that appears when a user clicks on their username.
@@ -26,8 +28,12 @@ export default function UserMenu({ username }: { username: string }) {
 
     // log the user out
     const logout = () => {
-        localStorage.removeItem("username");
-        navigate("/");
+        signOut(auth).then(() => {
+            localStorage.removeItem("username");
+            navigate("/");
+          }).catch((error) => {
+            console.log("Error in logout procedure.")
+          });
     };
 
     return (

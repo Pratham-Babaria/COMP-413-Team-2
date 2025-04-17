@@ -4,7 +4,6 @@ import { FaUser, FaLock, FaCheck} from "react-icons/fa";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
 import logo from "../../images/dermiq.png";
-import "../../styles/styles.css";
 
 //need more informative error messages
 
