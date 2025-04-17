@@ -19,7 +19,7 @@ const Index: React.FC = () => {
         localStorage.setItem("username", username);
     
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BASE}/users`, {
+            const response = await fetch("http://localhost:5050/users", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
