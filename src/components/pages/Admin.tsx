@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import UserMenu from "./userMenu";
 import ConfirmDeletionModal from "./confirmDeletion";
