@@ -37,8 +37,11 @@ const TakeSurvey: React.FC = () => {
   const [trackingIndex, setTrackingIndex] = useState<number | null>(null);
   const [gazeApiReady, setGazeApiReady] = useState(false);
   const gazeDotRef = useRef<HTMLDivElement | null>(null);
+  const [isCalibrated, setIsCalibrated] = useState(false);
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showTrackingModal, setShowTrackingModal] = useState(false); // New state for modal visibility
+  const [countdown, setCountdown] = useState(180); // 3-minute countdown in seconds
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -114,6 +117,12 @@ const TakeSurvey: React.FC = () => {
   const startTracking = (index: number) => {
     const imageEl = imageRefs.current[index];
     const heatmap = heatmapInstances.current[index];
+
+    console.log(heatmapRefs.current[index]?.getBoundingClientRect());
+    console.log(imageEl?.getBoundingClientRect());
+
+    const imageRect = imageEl?.getBoundingClientRect();
+    console.log("imageEl bounds:", imageRect);
   
     if (!gazeApiReady || !imageEl || !heatmap || gazeTrackingActive.current) {
       console.warn("Preconditions not met for eye tracking.");
@@ -124,8 +133,8 @@ const TakeSurvey: React.FC = () => {
     window.GazeCloudAPI.StartEyeTracking();
     gazeTrackingActive.current = true;
     setTrackingIndex(index);
+    setShowTrackingModal(true);
   
-    // Create gaze dot
     if (!gazeDotRef.current) {
       const dot = document.createElement("div");
       dot.className = styles.gazeDot;
@@ -135,21 +144,38 @@ const TakeSurvey: React.FC = () => {
   
     window.GazeCloudAPI.OnResult = (GazeData: any) => {
       if (GazeData.state !== 0) return;
-      const rect = imageEl.getBoundingClientRect();
-      const gazeX = GazeData.GazeX - rect.left;
-      const gazeY = GazeData.GazeY - rect.top;
+
+      if (!isCalibrated) {
+        setIsCalibrated(true);  // Trigger the countdown to start
+      }
+  
+      // Track relative to modal image
+      const modalImage = document.getElementById("modalImage");
+      if (!modalImage) return;
+  
+      const modalRect = modalImage.getBoundingClientRect();
+      const gazeX = GazeData.GazeX;
+      const gazeY = GazeData.GazeY;
   
       if (
-        gazeX >= 0 &&
-        gazeY >= 0 &&
-        gazeX <= rect.width &&
-        gazeY <= rect.height
+        gazeX >= modalRect.left &&
+        gazeY >= modalRect.top &&
+        gazeX <= modalRect.right &&
+        gazeY <= modalRect.bottom
       ) {
-        const point = { gaze_x: gazeX, gaze_y: gazeY, timestamp: Date.now() };
-        console.log("Tracked point", point);
+        // Save normalized coordinates (0–1)
+        //const normX = (gazeX - modalRect.left) / modalRect.width;
+        //const normY = (gazeY - modalRect.top) / modalRect.height;
+  
+        const point = {
+          gaze_x: gazeX - modalRect.left,
+          gaze_y: gazeY - modalRect.top,
+          timestamp: Date.now(),
+        };
+  
+        console.log("Tracked normalized point", point);
         gazePoints.current.push(point);
   
-        // Move gaze dot
         if (gazeDotRef.current) {
           gazeDotRef.current.style.left = `${GazeData.GazeX}px`;
           gazeDotRef.current.style.top = `${GazeData.GazeY}px`;
@@ -157,8 +183,8 @@ const TakeSurvey: React.FC = () => {
       }
     };
   };
-
-
+  
+  
   const stopTracking = async () => {
     if (!gazeTrackingActive.current || trackingIndex === null) return;
     console.log("Stopping eye tracking");
@@ -166,63 +192,65 @@ const TakeSurvey: React.FC = () => {
     window.GazeCloudAPI.StopEyeTracking();
     gazeTrackingActive.current = false;
   
-    // Remove the gaze dot from screen
     if (gazeDotRef.current) {
       gazeDotRef.current.remove();
       gazeDotRef.current = null;
     }
   
     const imageEl = imageRefs.current[trackingIndex];
+    const modalImageEl = document.getElementById("modalImage");
     const heatmap = heatmapInstances.current[trackingIndex];
-    const imageWidth = imageEl?.offsetWidth;
-    const imageHeight = imageEl?.offsetHeight;
+    const imageWidth = imageEl?.offsetWidth || 0;
+    const imageHeight = imageEl?.offsetHeight || 0;
+
+    const modalRect = modalImageEl?.getBoundingClientRect();
+    const imageRect = imageEl?.getBoundingClientRect();
+
+    const scaleX = (imageRect?.width || 0) / (modalRect?.width || 1);
+    const scaleY = (imageRect?.height || 0) / (modalRect?.height || 1);
+
+    console.log("Scale x: ", scaleX);
+    console.log("Scale y: ", scaleY);
+
+    const translatedPoints = gazePoints.current.map(p => ({
+      x: p.gaze_x * scaleX,
+      y: p.gaze_y * scaleY,
+      value: 1,
+      timestamp: p.timestamp,
+    }));
   
-    // Aggregate frequency of gaze points
-    // const heatmapData = new Map<string, number>();
-    // for (const point of gazePoints.current) {
-    //   const key = `${Math.round(point.gaze_x)},${Math.round(point.gaze_y)}`;
-    //   heatmapData.set(key, (heatmapData.get(key) || 0) + 1);
-    // }
-    // Calculate dynamic max based on aggregated gaze counts
     let maxValue = 1;
     const heatmapData = new Map<string, number>();
-
-    for (const point of gazePoints.current) {
-      const key = `${Math.round(point.gaze_x)},${Math.round(point.gaze_y)}`;
+  
+    for (const point of translatedPoints) {
+      const key = `${Math.round(point.x)},${Math.round(point.y)}`;
       const newCount = (heatmapData.get(key) || 0) + 1;
       heatmapData.set(key, newCount);
       if (newCount > maxValue) maxValue = newCount;
     }
   
-    // Render heatmap after eye tracking is done
-    // for (const [key, count] of heatmapData.entries()) {
-    //   const [x, y] = key.split(',').map(Number);
-    //   heatmap?.addData({ x, y, value: count });
-    // }
-    // Sort points by timestamp
-   
-    // Clear previous heatmap before replaying time series
     heatmap?.setData({ max: maxValue, data: [] });
-
-    // Sort points by timestamp
-    const sortedPoints = [...gazePoints.current].sort((a, b) => a.timestamp - b.timestamp);
-
-    // Gradually add points to heatmap like a time series
+  
+    // Sort and animate
+    const sortedPoints = [...translatedPoints].sort(
+      (a, b) => a.timestamp - b.timestamp
+    );
+  
     let i = 0;
     const interval = setInterval(() => {
       if (i >= sortedPoints.length) {
         clearInterval(interval);
         return;
       }
-
+  
       const p = sortedPoints[i];
-      heatmap?.addData({ x: Math.round(p.gaze_x), y: Math.round(p.gaze_y), value: 1 });
+      heatmap?.addData({ x: Math.round(p.x), y: Math.round(p.y), value: 1 });
       i++;
     }, 30);
 
-
+    console.log("Gaze points: ", gazePoints.current);
   
-    // Save gaze data to backend
+    // Save data to backend
     for (const point of gazePoints.current) {
       const payload = {
         user_id: parseInt(userId),
@@ -231,8 +259,8 @@ const TakeSurvey: React.FC = () => {
         gaze_x: point.gaze_x,
         gaze_y: point.gaze_y,
         timestamp: point.timestamp,
-        image_width: imageWidth,
-        image_height: imageHeight,
+        image_width: modalImageEl?.offsetWidth || 0,
+        image_height: modalImageEl?.offsetHeight || 0,
       };
   
       await fetch("http://localhost:5050/gaze_data", {
@@ -241,11 +269,18 @@ const TakeSurvey: React.FC = () => {
         body: JSON.stringify(payload),
       });
     }
+
+    console.log("Rendering heatmap on:", imageEl);
+    console.log("Translated points:", translatedPoints.slice(0, 5));
+    console.log("Image dimensions:", imageWidth, imageHeight);
+    console.log("Heatmap instance:", heatmap);
+  
   
     console.log("Saved gaze points:", gazePoints.current.length);
     gazePoints.current = [];
     setTrackingIndex(null);
   };
+  
 
   const handleSubmit = async () => {
     try {
@@ -272,6 +307,18 @@ const TakeSurvey: React.FC = () => {
     setShowSuccessModal(false);
     navigate("/doctor");
   };
+
+  useEffect(() => {
+    if (isCalibrated && showTrackingModal && countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+    if (countdown === 0) {
+      stopTracking();
+    }
+  }, [isCalibrated, showTrackingModal, countdown]);
 
   return (
     <div className="max-w-3xl mx-auto p-6">
@@ -304,12 +351,6 @@ const TakeSurvey: React.FC = () => {
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 cursor-pointer"
                     >
                       Start Eye Tracking
-                    </button>
-                    <button
-                      onClick={stopTracking}
-                      className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 cursor-pointer"
-                    >
-                      Stop Eye Tracking
                     </button>
                   </div>
                 </>
@@ -394,6 +435,35 @@ const TakeSurvey: React.FC = () => {
           </div>
         </div>
       )}
+      {showTrackingModal && trackingIndex !== null && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
+      <h3 className="text-xl font-semibold">Eye Tracking</h3>
+      <p className="mt-4">Tracking your gaze on the image...</p>
+      <p className="text-lg font-bold mt-2">
+        Time Left: {Math.floor(countdown / 60)}:{countdown % 60}
+      </p>
+
+      <div className="mt-4">
+        <img
+          src={questions[trackingIndex].image_url!}
+          alt="Diagnostic Image"
+          className="w-full max-h-96 object-contain rounded"
+          id="modalImage"
+        />
+      </div>
+
+      <div className="mt-4">
+        <button
+          onClick={stopTracking}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Stop Eye Tracking
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
