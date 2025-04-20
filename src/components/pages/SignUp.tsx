@@ -63,6 +63,9 @@ const SignUp: React.FC = () => {
                 if (error.code === "auth/password-does-not-meet-requirements"){
                     setErrorMsg("Password must be between 6 and 20 characters. Please try again.")
                 }
+                if (error.code === "auth/email-already-in-use"){
+                    setErrorMsg("Email already in use. Please log in.")
+                }
                 console.log('Error signing up:', error.code);
                 setShowModal(true);
                 // ..
