@@ -282,8 +282,37 @@ const TakeSurvey: React.FC = () => {
   };
   
 
+  // const handleSubmit = async () => {
+  //   try {
+  //     for (const q of questions) {
+  //       await fetch("http://localhost:5050/responses", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           survey_id: parseInt(surveyId!),
+  //           user_id: parseInt(userId),
+  //           question_id: q.id,
+  //           response_text: answers[q.id] || "",
+  //         }),
+  //       });
+  //     }
+  //     setShowSuccessModal(true); // Show modal instead of immediate redirect
+  //   } catch (err) {
+  //     console.error("Submission error:", err);
+  //   }
+  // };
   const handleSubmit = async () => {
     try {
+      // Check if the user has already submitted this survey
+      const res = await fetch(`http://localhost:5050/responses?survey_id=${surveyId}&user_id=${userId}`);
+      const existingResponses = await res.json();
+  
+      if (existingResponses.length > 0) {
+        alert("You have already submitted this survey.");
+        return;
+      }
+  
+      // Submit each question response
       for (const q of questions) {
         await fetch("http://localhost:5050/responses", {
           method: "POST",
@@ -296,11 +325,14 @@ const TakeSurvey: React.FC = () => {
           }),
         });
       }
+  
       setShowSuccessModal(true); // Show modal instead of immediate redirect
     } catch (err) {
       console.error("Submission error:", err);
+      alert("Failed to submit the survey. Please try again.");
     }
   };
+  
 
   
   const handleCloseModal = () => {
