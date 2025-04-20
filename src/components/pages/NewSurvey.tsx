@@ -34,6 +34,7 @@ const NewSurvey: React.FC = () => {
     const [trackingIndex, setTrackingIndex] = useState<number | null>(null);
     const gazePoints = useRef<any[]>([]);
     const [assignedUsernames, setAssignedUsernames] = useState("");
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
         const script = document.createElement("script");
@@ -317,9 +318,9 @@ const NewSurvey: React.FC = () => {
       
           // Store newSurvey.id in localStorage for later usage (e.g., gaze tracking)
           localStorage.setItem("currentSurveyId", newSurvey.id);
-      
-          alert("Survey created successfully!");
-          navigate("/admin");
+          setShowSuccessModal(true);
+
+        //   navigate("/admin");
         } catch (error: any) {
           console.error("Error creating survey:", error.message);
           alert(`Failed to create survey: ${error.message}`);
@@ -386,7 +387,7 @@ const NewSurvey: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                            {q.text === "Select your date of birth:" ? (
+                            {/* {q.text === "Select your date of birth:" ? (
                                     <input type="date" disabled/>
                                 ) : q.text === "Select your position:" ? (
                                     <select disabled>
@@ -399,7 +400,33 @@ const NewSurvey: React.FC = () => {
                                 ) : (
 
                                     <input type="text" placeholder="Answer here" className="w-full px-3 py-2 border border-gray-300 rounded-md" disabled/>
-                                )}
+                                )} */}
+                            {q.type === "date" ? (
+                                <input type="date" disabled />
+                            ) : q.type === "dropdown" && q.options ? (
+                                <select disabled className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option value="">Select</option>
+                                    {q.options.map((opt, idx) => (
+                                        <option key={idx} value={opt}>{opt}</option>
+                                    ))}
+                                </select>
+                            ) : q.type === "multiple_choice" && q.options ? (
+                                <div className="space-y-1">
+                                    {q.options.map((opt, idx) => (
+                                        <label key={idx} className="flex items-center space-x-2 text-gray-700">
+                                            <input type="radio" name={`q${i}`} disabled />
+                                            <span>{opt}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            ) : (
+                                <input
+                                    type="text"
+                                    placeholder="Answer here"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    disabled
+                                />
+                            )}
                         </div>
                     ))}
                 </div>
@@ -546,6 +573,25 @@ const NewSurvey: React.FC = () => {
                         </div>
                     </div>
                     )}
+
+            {showSuccessModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-xl shadow-xl w-80 text-center">
+                        <h3 className="text-lg font-semibold mb-2 text-green-700">Survey Created!</h3>
+                        <p className="text-sm mb-4">Your survey has been successfully created.</p>
+                        <button
+                            className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+                            onClick={() => {
+                                setShowSuccessModal(false);
+                                navigate("/admin");
+                            }}
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
+
 
             </div>
         </div>
