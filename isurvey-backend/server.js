@@ -74,6 +74,15 @@ app.get('/users', async (req, res) => {
     }
 });
 
+app.delete('/users', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM users');
+        res.status(200).json({ message: 'All users deleted.' });
+    } catch (err) {
+        console.error('Error deleting users:', err.message);
+        res.status(500).json({ error: 'Failed to delete users.' });
+    }
+});
 
 
 app.post('/surveys', async (req, res) => {
@@ -600,4 +609,3 @@ app.delete('/surveys/:survey_id', async (req, res) => {
         res.status(500).json({ error: 'Server error while deleting survey.' });
     }
 });
-
