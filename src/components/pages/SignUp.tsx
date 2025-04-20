@@ -29,11 +29,28 @@ const SignUp: React.FC = () => {
             return;
         }
         createUserWithEmailAndPassword(auth, username, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 // Signed up 
                 const user = userCredential.user;
                 if (user.email != null){
-                    console.log(user.email)
+                    console.log(user.email);
+                    const response = await fetch("http://localhost:5050/register", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            username: user.email,
+                            password,
+                            role: userType,
+                        }),
+                    });
+        
+                    const data = await response.json();
+        
+                    if (!response.ok) {
+                        throw new Error(data.error || "Registration failed on server.");
+                    }
                     localStorage.setItem("username", user.email);
                     navigate(userType === "admin" ? "/admin" : "/doctor");
                 }
