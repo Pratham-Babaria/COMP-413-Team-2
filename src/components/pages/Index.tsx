@@ -27,27 +27,24 @@ const Index: React.FC = () => {
                 if (user.email != null){
                     localStorage.setItem("username", username);
                     try {
-                        const response = await fetch(`${process.env.REACT_APP_API_BASE}/users`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                username: username,
-                                role: userType
-                            })
-                        });
-                
-                        const data = await response.json();
-                        if (data.id) {
-                            localStorage.setItem("userId", data.id);  // Save for later use
+                        const response = await fetch("http://localhost:5050/users");
+                        const users = await response.json();
+                        const matchedUser = users.find(
+                            (u: any) => u.username === username && u.role === userType
+                        );
+                    
+                        if (!matchedUser) {
+                            throw new Error("No matching user found in the database.");
                         }
+                    
+                        localStorage.setItem("userId", matchedUser.id);
                     } catch (error) {
-                        console.error("Error during login:", error);
+                        console.error("Error verifying user in DB:", error);
                         alert("Login failed. Please try again.");
                         return;
-                    }
+                    }                    
                     navigate(userType === "admin" ? "/admin" : "/doctor");
                 }
-                // ...
             })
             .catch((error) => {
                 if (error.code ===  "auth/invalid-email") {
