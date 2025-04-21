@@ -76,39 +76,39 @@ const TakeSurvey: React.FC = () => {
       .then((data: Question[]) => setQuestions(data));
   }, [surveyId]);
 
-  useEffect(() => {
-    // heatmapInstances.current = heatmapRefs.current.map((container) =>
-    //   container
-    //     ? h337.create({
-    //         container,
-    //         radius: 30,
-    //         maxOpacity: 0.6,
-    //         minOpacity: 0.2,
-    //         blur: 0.75,
-    //       })
-    //     : null
-    // );
+  // useEffect(() => {
+  //   // heatmapInstances.current = heatmapRefs.current.map((container) =>
+  //   //   container
+  //   //     ? h337.create({
+  //   //         container,
+  //   //         radius: 30,
+  //   //         maxOpacity: 0.6,
+  //   //         minOpacity: 0.2,
+  //   //         blur: 0.75,
+  //   //       })
+  //   //     : null
+  //   // );
 
-    heatmapInstances.current = heatmapRefs.current.map((container) =>
-      container
-        ? h337.create({
-            container,
-            radius: 25,         // smaller radius = tighter clusters
-            maxOpacity: 0.7,    // play around with contrast
-            minOpacity: 0.1,
-            blur: 0.9,          // more blur = stronger gradients
-            gradient: { // play around with gradient
-              '.0': 'blue',
-              '.25': 'green',
-              '.5': 'yellow',
-              '.75': 'orange',
-              '1.0': 'red'
-            }
-          })
-        : null
-    );
+  //   heatmapInstances.current = heatmapRefs.current.map((container) =>
+  //     container
+  //       ? h337.create({
+  //           container,
+  //           radius: 25,         // smaller radius = tighter clusters
+  //           maxOpacity: 0.7,    // play around with contrast
+  //           minOpacity: 0.1,
+  //           blur: 0.9,          // more blur = stronger gradients
+  //           gradient: { // play around with gradient
+  //             '.0': 'blue',
+  //             '.25': 'green',
+  //             '.5': 'yellow',
+  //             '.75': 'orange',
+  //             '1.0': 'red'
+  //           }
+  //         })
+  //       : null
+  //   );
     
-  }, [questions]);
+  // }, [questions]);
 
   const handleAnswerChange = (questionId: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -370,12 +370,38 @@ const TakeSurvey: React.FC = () => {
                     className="relative w-fit"
                     style={{ pointerEvents: "none" }}
                   >
-                    <img
+                    {/* <img
                       ref={(el) => (imageRefs.current[i] = el)}
                       src={q.image_url}
                       alt="diagnostic"
                       className="rounded mb-2"
-                    />
+                    /> */}
+                    <img
+                    ref={(el) => (imageRefs.current[i] = el)}
+                    src={q.image_url}
+                    alt="diagnostic"
+                    className="rounded mb-2"
+                    onLoad={() => {
+                      if (heatmapRefs.current[i]) {
+                        heatmapInstances.current[i] = h337.create({
+                          container: heatmapRefs.current[i]!,
+                          radius: 25,
+                          maxOpacity: 0.7,
+                          minOpacity: 0.1,
+                          blur: 0.9,
+                          gradient: {
+                            '.0': 'blue',
+                            '.25': 'green',
+                            '.5': 'yellow',
+                            '.75': 'orange',
+                            '1.0': 'red',
+                          },
+                        });
+                        console.log("Heatmap initialized for image", i);                
+                      }
+                    }}
+                  />
+
                   </div>
                   <div className="flex gap-2 mt-2">
                     <button
