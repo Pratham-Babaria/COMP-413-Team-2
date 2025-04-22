@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 import h337 from 'heatmap.js';
 
+interface Doctor {
+    id: number;
+    username: string;
+    role: string;
+  }
+
 const NewSurvey: React.FC = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -33,8 +39,10 @@ const NewSurvey: React.FC = () => {
     const gazeTrackingActive = useRef(false);
     const [trackingIndex, setTrackingIndex] = useState<number | null>(null);
     const gazePoints = useRef<any[]>([]);
-    const [assignedUsernames, setAssignedUsernames] = useState("");
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
+    const [selectedUsernames, setSelectedUsernames] = useState<string[]>([]);
 
     useEffect(() => {
         const script = document.createElement("script");
@@ -66,6 +74,33 @@ const NewSurvey: React.FC = () => {
                 : null
         );        
     }, [questions]);
+
+    useEffect(() => {
+        const fetchDoctors = async () => {
+          try {
+            const res = await fetch("http://localhost:5050/users");
+            if (!res.ok) throw new Error("Failed to fetch users");
+            const allUsers = await res.json();
+            
+            const docs = allUsers.filter((u: any) => u.role === "doctor");
+            setDoctors(docs);
+          } catch (err) {
+            console.error("Error fetching doctors:", err);
+          }
+        };
+        fetchDoctors();
+      }, []);
+    
+    const toggleDoctor = (username: string) => {
+        setSelectedUsernames((prev) =>
+          prev.includes(username)
+            ? prev.filter((u) => u !== username)
+            : [...prev, username]
+        );
+      };
+    
+    const isDoctorSelected = (username: string) =>
+        selectedUsernames.includes(username);
 
     const saveGazeData = async (questionIndex: number) => {
         console.log("Saving gaze points");
@@ -243,8 +278,8 @@ const NewSurvey: React.FC = () => {
           return;
         }
       
-        // To do: Get the user ID
-        const userId = "1"; // temporary user id
+        
+        const userId = localStorage.getItem("userId");
         if (!userId) {
           alert("You must be logged in or have a valid userId before creating a survey.");
           return;
@@ -258,7 +293,7 @@ const NewSurvey: React.FC = () => {
             body: JSON.stringify({
               title,
               description,
-              created_by: parseInt(userId, 10), // or whatever your backend needs
+              created_by: parseInt(userId),
             }),
           });
       
@@ -290,31 +325,26 @@ const NewSurvey: React.FC = () => {
             }
           }
 
-          if (assignedUsernames.trim()) {
-            const doctorNames = assignedUsernames
-              .split(",")
-              .map(name => name.trim())
-              .filter(Boolean);
 
-            for (const docName of doctorNames) {
+            for (const username of selectedUsernames) {
               try {
                 const assignRes = await fetch("http://localhost:5050/survey-assignments/username", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     survey_id: newSurvey.id,
-                    username: docName,
+                    username: username,
                   }),
                 });
                 if (!assignRes.ok) {
                   const errData = await assignRes.json();
-                  console.warn(`Failed to assign survey to ${docName}:`, errData.error);
+                  console.warn(`Failed to assign survey to ${username}:`, errData.error);
                 }
               } catch (assignError) {
                 console.error("Error assigning survey:", assignError);
               }
             }
-          }
+          
       
           // Store newSurvey.id in localStorage for later usage (e.g., gaze tracking)
           localStorage.setItem("currentSurveyId", newSurvey.id);
@@ -353,14 +383,20 @@ const NewSurvey: React.FC = () => {
                     rows={4}
                 />
 
-                <label className="block text-lg font-semibold text-gray-700 mb-2">Assign to these doctors (comma-separated):</label>
-                <input
-                    type="text"
-                    value={assignedUsernames}
-                    onChange={(e) => setAssignedUsernames(e.target.value)}
-                    className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    placeholder="e.g. drsmith, drjones"
-                />
+                {/* doctor checklist */}
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Assign to Doctors:</h3>
+                {doctors.length ? (
+                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-md p-2 mb-6">
+                    {doctors.map((d) => (
+                    <label key={d.id} className="flex items-center space-x-2 py-1 px-2 hover:bg-gray-50 rounded">
+                        <input type="checkbox" checked={isDoctorSelected(d.username)} onChange={() => toggleDoctor(d.username)} />
+                        <span className="text-gray-700">{d.username}</span>
+                    </label>
+                    ))}
+                </div>
+                ) : (
+                <p className="mb-6 text-sm text-gray-500">Loading doctors…</p>
+                )}
 
                 <h3 className="text-xl text-blue-600 font-semibold mb-4">Survey Questions:</h3>
                 <div className="space-y-6">
