@@ -7,6 +7,7 @@ import NewSurvey from "./components/pages/NewSurvey";
 import SignUp from "./components/pages/SignUp";
 import TakeSurvey from "./components/pages/TakeSurvey";
 import DoctorResponses from "./components/pages/DoctorResponses";
+import AdminResponses from "./components/pages/AdminResponses";
 
 /**
  * Root application component that sets up routing for the different user views.
@@ -24,6 +25,7 @@ export default function App(): JSX.Element {
                 <Route path="/new-survey" element={<NewSurvey />} />
                 <Route path="/doctor/surveys/:surveyId" element={<TakeSurvey />} />
                 <Route path="/responses/:surveyId?" element={<DoctorResponses />} />
+                <Route path="/surveys/:surveyId/responses" element={<AdminResponses />} />
             </Routes>
         </Router>
     );

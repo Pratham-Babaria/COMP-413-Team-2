@@ -122,11 +122,17 @@ export default function Admin() {
                                 <strong>{survey.title}</strong> - {survey.description}
                             </div>
                             <div className="flex gap-2">
-                                <button
+                                {/* <button
                                     className={styles.takeSurveyBtn}
                                     onClick={() => console.log("View survey", index)}
                                 >
                                     View
+                                </button> */}
+                                <button
+                                    className={styles.takeSurveyBtn}
+                                    onClick={() => navigate(`/surveys/${survey.id}/responses`)}
+                                    >
+                                    View Responses
                                 </button>
                                 <button
                                     className={styles.deleteSurveyBtn}
