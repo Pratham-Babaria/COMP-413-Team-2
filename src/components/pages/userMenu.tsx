@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiLogOut, FiSettings } from "react-icons/fi";
+import { FiLogOut, FiInfo } from "react-icons/fi";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
 
@@ -48,11 +48,11 @@ export default function UserMenu({ username }: { username: string }) {
             {showDropdown && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl z-10 text-black py-2">
                     <button
-                        onClick={() => navigate("/settings")}
+                        onClick={() => navigate("/about")}
                         className="w-full text-left px-4 py-3 text-lg flex items-center gap-2 hover:bg-gray-100 transition"
                     >
-                        <FiSettings className="text-gray-600" />
-                        Settings
+                        <FiInfo className="text-gray-600" />
+                        Support
                     </button>
                     <button
                         onClick={logout}
