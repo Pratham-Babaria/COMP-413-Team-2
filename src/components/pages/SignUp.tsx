@@ -52,6 +52,7 @@ const SignUp: React.FC = () => {
                         throw new Error(data.error || "Registration failed on server.");
                     }
                     localStorage.setItem("username", user.email);
+                    localStorage.setItem("userId", data.id)
                     navigate(userType === "admin" ? "/admin" : "/doctor");
                 }
                 // ...
