@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import UserMenu from "./userMenu";
 import ConfirmDeletionModal from "./confirmDeletion";
 import {styles} from "../../styles/sharedStyles";
+import { FaUserShield } from "react-icons/fa"
 
 
 interface Survey {
@@ -90,7 +91,7 @@ export default function Admin() {
     };
 
     /**
-     * Helper functions that helps render the main content in the page (displaying surveys).
+     * Helper function that helps render the main content in the page (displaying surveys).
      * When there are no available surveys, we will have a more intuitive layout for admins
      * to add a survey.
      */
@@ -165,7 +166,16 @@ export default function Admin() {
                     <button className={styles.navButtonClass} onClick={() => navigate("/new-survey")}>Surveys</button>
                     <button className={styles.navButtonClass} onClick={() => navigate("/approvals")}>Approvals</button>
                 </div>
-                <UserMenu username={adminName} />
+                <div className="flex items-center gap-2 relative group">
+                    {/* Admin icon with tooltip */}
+                    <div className="relative group">
+                        <FaUserShield className="text-white text-xl cursor-pointer" />
+                        <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                            Admin Role
+                        </div>
+                    </div>
+                    <UserMenu username={adminName} />
+                </div>
             </div>
 
             {/* Content Area */}

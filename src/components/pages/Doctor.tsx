@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserMenu from "./userMenu";
 import { styles } from "../../styles/sharedStyles";
+import { FaUserMd } from "react-icons/fa";
+
 
 interface Survey {
     id: number;
@@ -15,6 +17,10 @@ interface Response {
     user_id: number;
 }
 
+/**
+ * Doctor dashboard component for doctors to take surveys
+ * and upload them.
+ */
 export default function Doctor() {
     const [surveys, setSurveys] = useState<Survey[]>([]);
     const [submittedSurveyIds, setSubmittedSurveyIds] = useState<Set<number>>(new Set());
@@ -40,6 +46,12 @@ export default function Doctor() {
             .catch((err) => console.error("Error fetching user responses:", err));
     }, [doctorId]);
 
+
+    /**
+     * Helper function that helps render the main content in the page (displaying surveys).
+     * When there are no available surveys, we will have a more intuitive layout for admins
+     * to add a survey.
+     */
     const renderSurveyList = () => {
         if (surveys.length === 0) {
             return (
@@ -65,7 +77,7 @@ export default function Doctor() {
                                     className={styles.takeSurveyBtn}
                                     onClick={() => navigate(`/responses/${survey.id}`)}
                                 >
-                                    View Responses
+                                    View Your Response
                                 </button>
                             ) : (
                                 <button
@@ -90,7 +102,16 @@ export default function Doctor() {
                     <button className={styles.navButtonClass} onClick={() => navigate("/responses")}>Responses</button>
                     <button className={styles.navButtonClass} onClick={() => navigate("/invites")}>Invites</button>
                 </div>
-                <UserMenu username={doctorName} />
+                <div className="flex items-center gap-2 relative group">
+                    <div className="relative group">
+                        <FaUserMd className="text-white text-xl cursor-pointer" />
+                        <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                            Doctor Role
+                        </div>
+                    </div>
+
+                    <UserMenu username={doctorName} />
+                </div>
             </div>
 
             <div className={`${styles.contentAreaClass} ${styles.sectionPadding}`}>
