@@ -159,11 +159,12 @@ export default function Admin() {
 
     return (
         <div className={styles.fullPageClass}>
-            {/* Navbar */}
+
+            {/* Navigation Bar */}
             <div className={styles.navBarClass}>
                 <div className="flex gap-4">
-                    <button className={styles.navButtonClass} onClick={() => navigate("/research")}>Research</button>
-                    <button className={styles.navButtonClass} onClick={() => navigate("/new-survey")}>Surveys</button>
+                    { /* <button className={styles.navButtonClass} onClick={() => navigate("/research")}>Research</button> */}
+                    { /* <button className={styles.navButtonClass} onClick={() => navigate("/new-survey")}>Surveys</button> */}
                     <button className={styles.navButtonClass} onClick={() => navigate("/approvals")}>Approvals</button>
                 </div>
                 <div className="flex items-center gap-2 relative group">
@@ -197,6 +198,11 @@ export default function Admin() {
                     onConfirm={confirmSurveyDeletion}
                 />
             )}
+
+            {/* Footer */}
+            <footer className="text-right text-sm text-gray-500 pr-6 py-4">
+                &copy; 2025 DermiQ. All rights reserved.
+            </footer>
         </div>
     );
 }

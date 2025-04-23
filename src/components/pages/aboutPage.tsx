@@ -23,11 +23,14 @@ export default function AboutPage() {
                 </p>
 
                 <p className="text-gray-700 text-lg">
-                    As a <strong>Responder</strong> (e.g., dermatologist, nurse, or medical student), you can take 
-                    assigned surveys, review your performance, and compare against expert results. As an 
-                    <strong> Admin</strong> (e.g., hiring manager, committee member, or DermiQ staff), you can create, 
+                    As an <strong> Admin</strong> (e.g., hiring manager, committee member, or DermiQ staff), you can create, 
                     assign, and manage surveys, and review submissions. Each role has access to features 
                     aligned with its responsibilities.
+                </p>
+
+                <p className="text-gray-700 text-lg">
+                    As a <strong>Responder</strong> (e.g., dermatologist, nurse, or medical student), you can take 
+                    assigned surveys, review your performance, and compare against expert results. 
                 </p>
 
                 <p className="text-gray-700 text-lg">

@@ -62,7 +62,6 @@ export default function Doctor() {
                 </div>
             );
         }
-
         return (
             <ul className="space-y-2">
                 {surveys.map((survey) => {
@@ -122,6 +121,11 @@ export default function Doctor() {
                     </div>
                 </div>
             </div>
+
+            {/* Footer */}
+            <footer className="text-right text-sm text-gray-500 pr-6 py-4">
+                &copy; 2025 DermiQ. All rights reserved.
+            </footer>
         </div>
     );
 }
