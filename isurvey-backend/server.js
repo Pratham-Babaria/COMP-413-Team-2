@@ -608,3 +608,51 @@ app.delete('/surveys/:survey_id', async (req, res) => {
         res.status(500).json({ error: 'Server error while deleting survey.' });
     }
 });
+
+app.post('/classifications', async (req, res) => {
+    const { user_id, survey_id, result } = req.body;
+  
+    try {
+      const query = `
+        INSERT INTO classification (user_id, survey_id, result)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `;
+      const values = [user_id, survey_id, result];
+  
+      const { rows } = await pool.query(query, values);
+      res.status(201).json(rows[0]);
+    } catch (err) {
+      console.error('Error inserting classification:', err);
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.get('/classifications', async (req, res) => {
+    const { user_id, survey_id } = req.query;
+  
+    try {
+      let query = 'SELECT * FROM classification';
+      const values = [];
+      const conditions = [];
+  
+      if (user_id) {
+        values.push(user_id);
+        conditions.push(`user_id = $${values.length}`);
+      }
+      if (survey_id) {
+        values.push(survey_id);
+        conditions.push(`survey_id = $${values.length}`);
+      }
+  
+      if (conditions.length > 0) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
+  
+      const { rows } = await pool.query(query, values);
+      res.json(rows);
+    } catch (err) {
+      console.error('Error fetching classifications:', err);
+      res.status(500).json({ error: 'Database error' });
+    }
+  });

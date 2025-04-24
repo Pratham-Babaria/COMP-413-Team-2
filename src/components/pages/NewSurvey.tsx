@@ -413,14 +413,14 @@ const NewSurvey: React.FC = () => {
                                             className="rounded-lg max-w-full"
                                         />
                                     </div>
-                                    <div className="mt-2 flex gap-4">
+                                    {/* <div className="mt-2 flex gap-4">
                                         <button onClick={() => startTracking(i)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                                             Start Eye Tracking
                                         </button>
                                         <button onClick={stopTracking} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                                             Stop Eye Tracking
                                         </button>
-                                    </div>
+                                    </div> */}
                                 </div>
                             )}
                             {/* {q.text === "Select your date of birth:" ? (
@@ -585,9 +585,7 @@ const NewSurvey: React.FC = () => {
                               
                                   {hoveredImageId === image.isic_id && (
                                     <div className={`absolute top-full mt-1 ${tooltipPosition} bg-white text-sm text-gray-800 border rounded shadow p-2 z-10`}>
-                                      <p><strong>Age:</strong> {image.metadata.clinical.age_approx || "N/A"}</p>
                                       <p><strong>Diagnosis:</strong> {image.metadata.clinical.diagnosis_1 || "Unknown"}</p>
-                                      <p><strong>Site:</strong> {image.metadata.clinical.anatom_site_general || "N/A"}</p>
                                     </div>
                                   )}
                                 </div>

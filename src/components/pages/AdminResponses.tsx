@@ -30,6 +30,7 @@ const AdminResponses: React.FC = () => {
   const [responses, setResponses] = useState<Response[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [classification, setClassification] = useState<string | null>(null);
 
   const [showHeatmapModal, setShowHeatmapModal] = useState(false);
   const [heatmapData, setHeatmapData] = useState<{ x: number; y: number; value: number; timestamp: number }[]>([]);
@@ -66,6 +67,26 @@ useEffect(() => {
           });
       });
   }, [surveyId]);
+
+  useEffect(() => {
+    if (selectedUserId !== null) {
+      const fetchClassification = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5050/classifications?user_id=${selectedUserId}&survey_id=${surveyId}`
+          );
+          if (!response.ok) throw new Error("Failed to fetch classification");
+          const data = await response.json();
+          setClassification(data[0].result);
+        } catch (error) {
+          console.error(error);
+          setClassification(null);
+        }
+      };
+  
+      fetchClassification();
+    }
+  }, [selectedUserId, surveyId]);
 
 useEffect(() => {
     if (!showHeatmapModal || heatmapData.length === 0) return;
@@ -188,6 +209,14 @@ return (
           No responses have been submitted for this survey yet.
         </div>
       )}
+
+{classification && (
+  <div className="mb-6 p-6 bg-white border border-gray-400 rounded-xl shadow-xl">
+  <p className="text-xl text-blue-500 font-bold mb-4">
+    Classification Result: <span className="font-bold text-gray-700">{classification}</span>
+  </p>
+</div>
+)}
   
       {questions.map(q => (
         <div key={q.id} className="mb-6">

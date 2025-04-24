@@ -249,7 +249,7 @@ const TakeSurvey: React.FC = () => {
       }
   
       // Submit each question response
-      for (const q of questions) {
+      const responsePromises = questions.map(async (q) => {
         await fetch("http://localhost:5050/responses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -260,7 +260,20 @@ const TakeSurvey: React.FC = () => {
             response_text: answers[q.id] || "",
           }),
         });
-      }
+      });
+
+      await Promise.all(responsePromises);
+
+      const classification_response = await fetch("http://127.0.0.1:8000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: parseInt(userId), survey_id: parseInt(surveyId!) }),
+      });
+  
+      const classification_data = await classification_response.json();
+      console.log(classification_data)
   
       setShowSuccessModal(true); // Show modal instead of immediate redirect
     } catch (err) {
