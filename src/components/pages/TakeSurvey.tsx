@@ -71,11 +71,11 @@ const TakeSurvey: React.FC = () => {
   useEffect(() => {
     if (!surveyId) return;
 
-    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}`)
+    fetch(`https://comp-413-team-2.onrender.com/surveys/${surveyId}`)
       .then((res) => res.json())
       .then((data: Survey) => setSurvey(data));
 
-    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}/questions`)
+    fetch(`https://comp-413-team-2.onrender.com/surveys/${surveyId}/questions`)
       .then((res) => res.json())
       .then((data: Question[]) => setQuestions(data));
   }, [surveyId]);
@@ -217,7 +217,7 @@ const TakeSurvey: React.FC = () => {
     // send to backend
     const container = document.getElementById("heatmap-modal-container");
     await Promise.all(raw.map(pt =>
-      fetch("https://isurvey-backend.onrender.com/gaze_data", {
+      fetch("https://comp-413-team-2.onrender.com/gaze_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -240,7 +240,7 @@ const TakeSurvey: React.FC = () => {
   const handleSubmit = async () => {
     try {
       // Check if the user has already submitted this survey
-      const res = await fetch(`https://isurvey-backend.onrender.com/responses?survey_id=${surveyId}&user_id=${userId}`);
+      const res = await fetch(`https://comp-413-team-2.onrender.com/responses?survey_id=${surveyId}&user_id=${userId}`);
       const existingResponses = await res.json();
   
       if (existingResponses.length > 0) {
@@ -250,7 +250,7 @@ const TakeSurvey: React.FC = () => {
   
       // Submit each question response
       const responsePromises = questions.map(async (q) => {
-        await fetch("https://isurvey-backend.onrender.com/responses", {
+        await fetch("https://comp-413-team-2.onrender.com/responses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

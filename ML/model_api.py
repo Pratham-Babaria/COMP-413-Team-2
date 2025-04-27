@@ -162,7 +162,7 @@ def predict_user(data: SubmissionRequest):
         return {"status": "error", "message": f"Prediction failed: {str(e)}"}
 
     try:
-        api_url = "https://isurvey-backend.onrender.com/classifications"
+        api_url = "https://comp-413-team-2.onrender.com/classifications"
         payload = {
             "user_id": data.user_id,
             "survey_id": data.survey_id,

@@ -27,7 +27,7 @@ const Index: React.FC = () => {
                 if (user.email != null){
                     localStorage.setItem("username", username);
                     try {
-                        const response = await fetch("https://isurvey-backend.onrender.com/users");
+                        const response = await fetch("https://comp-413-team-2.onrender.com/users");
                         const users = await response.json();
                         const matchedUser = users.find(
                             (u: any) => u.username === username && u.role === userType

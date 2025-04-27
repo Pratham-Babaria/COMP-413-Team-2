@@ -78,7 +78,7 @@ const NewSurvey: React.FC = () => {
     useEffect(() => {
         const fetchDoctors = async () => {
           try {
-            const res = await fetch("https://isurvey-backend.onrender.com/users");
+            const res = await fetch("https://comp-413-team-2.onrender.com/users");
             if (!res.ok) throw new Error("Failed to fetch users");
             const allUsers = await res.json();
             
@@ -142,7 +142,7 @@ const NewSurvey: React.FC = () => {
             console.log("saving gaze point", payload); // debugging
 
             try {
-                await fetch("https://isurvey-backend.onrender.com/gaze-data", {
+                await fetch("https://comp-413-team-2.onrender.com/gaze-data", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
@@ -210,7 +210,7 @@ const NewSurvey: React.FC = () => {
 
     const fetchLesions = async () => {
         try {
-            const response = await fetch("https://isurvey-backend.onrender.com/isic-images");
+            const response = await fetch("https://comp-413-team-2.onrender.com/isic-images");
             const data = await response.json();
             setLesions(data.results || []);
         } catch (error) {
@@ -287,7 +287,7 @@ const NewSurvey: React.FC = () => {
       
         try {
           // Create the survey in the DB
-          const surveyRes = await fetch("https://isurvey-backend.onrender.com/surveys", {
+          const surveyRes = await fetch("https://comp-413-team-2.onrender.com/surveys", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -307,7 +307,7 @@ const NewSurvey: React.FC = () => {
       
           // Create each question in the DB (POST /questions with survey_id)
           for (const q of questions) {
-            const questionRes = await fetch("https://isurvey-backend.onrender.com/questions", {
+            const questionRes = await fetch("https://comp-413-team-2.onrender.com/questions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -328,7 +328,7 @@ const NewSurvey: React.FC = () => {
 
             for (const username of selectedUsernames) {
               try {
-                const assignRes = await fetch("https://isurvey-backend.onrender.com/survey-assignments/username", {
+                const assignRes = await fetch("https://comp-413-team-2.onrender.com/survey-assignments/username", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({

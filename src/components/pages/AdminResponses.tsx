@@ -41,15 +41,15 @@ const AdminResponses: React.FC = () => {
 useEffect(() => {
     if (!surveyId) return;
   
-    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}`)
+    fetch(`https://comp-413-team-2.onrender.com/surveys/${surveyId}`)
       .then(res => res.json())
       .then(data => setSurveyTitle(data.title));
   
-    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}/questions`)
+    fetch(`https://comp-413-team-2.onrender.com/surveys/${surveyId}/questions`)
       .then(res => res.json())
       .then(data => setQuestions(data));
   
-    fetch(`https://isurvey-backend.onrender.com/responses?survey_id=${surveyId}`)
+    fetch(`https://comp-413-team-2.onrender.com/responses?survey_id=${surveyId}`)
       .then(res => res.json())
       .then((data: Response[]) => {
         setResponses(data);
@@ -58,7 +58,7 @@ useEffect(() => {
         const userIds = Array.from(new Set(data.map(r => r.user_id)));
   
         // fetch all users, then match the relevant ones
-        fetch("https://isurvey-backend.onrender.com/users")
+        fetch("https://comp-413-team-2.onrender.com/users")
           .then(res => res.json())
           .then((allUsers: User[]) => {
             const relevantUsers = allUsers.filter(u => userIds.includes(u.id));
@@ -73,7 +73,7 @@ useEffect(() => {
       const fetchClassification = async () => {
         try {
           const response = await fetch(
-            `https://isurvey-backend.onrender.com/classifications?user_id=${selectedUserId}&survey_id=${surveyId}`
+            `https://comp-413-team-2.onrender.com/classifications?user_id=${selectedUserId}&survey_id=${surveyId}`
           );
           if (!response.ok) throw new Error("Failed to fetch classification");
           const data = await response.json();
@@ -155,7 +155,7 @@ const fetchGazeData = async (questionId: number, imageUrl: string) => {
     // Wait for the modal to render
     setTimeout(async () => {
       const res = await fetch(
-        `https://isurvey-backend.onrender.com/gaze_data?survey_id=${surveyId}&user_id=${selectedUserId}&question_id=${questionId}`
+        `https://comp-413-team-2.onrender.com/gaze_data?survey_id=${surveyId}&user_id=${selectedUserId}&question_id=${questionId}`
       );
       const data = await res.json();
   

@@ -33,15 +33,15 @@ const DoctorResponses: React.FC = () => {
   useEffect(() => {
     if (!surveyId) return;
 
-    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}`)
+    fetch(`https://comp-413-team-2.onrender.com/surveys/${surveyId}`)
       .then(res => res.json())
       .then(data => setSurveyTitle(data.title));
 
-    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}/questions`)
+    fetch(`https://comp-413-team-2.onrender.com/surveys/${surveyId}/questions`)
       .then(res => res.json())
       .then(data => setQuestions(data));
 
-    fetch(`https://isurvey-backend.onrender.com/responses?survey_id=${surveyId}&user_id=${userId}`)
+    fetch(`https://comp-413-team-2.onrender.com/responses?survey_id=${surveyId}&user_id=${userId}`)
       .then(res => res.json())
       .then((data: Response[]) => setResponses(data));
   }, [surveyId, userId]);
@@ -104,7 +104,7 @@ const DoctorResponses: React.FC = () => {
 
     setTimeout(async () => {
       const res = await fetch(
-        `https://isurvey-backend.onrender.com/gaze_data?survey_id=${surveyId}&user_id=${userId}&question_id=${questionId}`
+        `https://comp-413-team-2.onrender.com/gaze_data?survey_id=${surveyId}&user_id=${userId}&question_id=${questionId}`
       );
       const data = await res.json();
 
