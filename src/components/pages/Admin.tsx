@@ -31,7 +31,7 @@ export default function Admin() {
 
     // Load surveys
     useEffect(() => {
-        fetch("http://localhost:5050/surveys")
+        fetch("https://isurvey-backend.onrender.com/surveys")
           .then((res) => res.json())
           .then((data: Survey[]) => {
             setSurveys(data);
@@ -53,7 +53,7 @@ export default function Admin() {
         }
 
         try {
-            const response = await fetch(`http://localhost:5050/surveys/${surveyId}`, {
+            const response = await fetch(`fetch("https://isurvey-backend.onrender.com/surveys/${surveyId}`, {
                 method: "DELETE",
             });
 

@@ -33,15 +33,15 @@ const DoctorResponses: React.FC = () => {
   useEffect(() => {
     if (!surveyId) return;
 
-    fetch(`http://localhost:5050/surveys/${surveyId}`)
+    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}`)
       .then(res => res.json())
       .then(data => setSurveyTitle(data.title));
 
-    fetch(`http://localhost:5050/surveys/${surveyId}/questions`)
+    fetch(`https://isurvey-backend.onrender.com/surveys/${surveyId}/questions`)
       .then(res => res.json())
       .then(data => setQuestions(data));
 
-    fetch(`http://localhost:5050/responses?survey_id=${surveyId}&user_id=${userId}`)
+    fetch(`https://isurvey-backend.onrender.com/responses?survey_id=${surveyId}&user_id=${userId}`)
       .then(res => res.json())
       .then((data: Response[]) => setResponses(data));
   }, [surveyId, userId]);
@@ -104,7 +104,7 @@ const DoctorResponses: React.FC = () => {
 
     setTimeout(async () => {
       const res = await fetch(
-        `http://localhost:5050/gaze_data?survey_id=${surveyId}&user_id=${userId}&question_id=${questionId}`
+        `https://isurvey-backend.onrender.com/gaze_data?survey_id=${surveyId}&user_id=${userId}&question_id=${questionId}`
       );
       const data = await res.json();
 

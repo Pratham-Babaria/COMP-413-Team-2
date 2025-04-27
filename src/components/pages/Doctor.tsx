@@ -31,13 +31,13 @@ export default function Doctor() {
 
     useEffect(() => {
         // Get assigned surveys
-        fetch(`http://localhost:5050/survey-assignments/${doctorId}`)
+        fetch(`https://isurvey-backend.onrender.com/survey-assignments/${doctorId}`)
             .then((res) => res.json())
             .then((data: Survey[]) => setSurveys(data))
             .catch((err) => console.error("Error fetching assigned surveys:", err));
 
         // Check which surveys have been submitted
-        fetch(`http://localhost:5050/responses?user_id=${doctorId}`)
+        fetch(`https://isurvey-backend.onrender.com/responses?user_id=${doctorId}`)
             .then((res) => res.json())
             .then((data: Response[]) => {
                 const surveyIds = new Set(data.map((r) => r.survey_id));
