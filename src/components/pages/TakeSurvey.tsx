@@ -329,7 +329,7 @@ const TakeSurvey: React.FC = () => {
 
           {questions.map((q, i) => (
             <div key={q.id} className="mb-6">
-              <label className="font-semibold block mb-1">
+              <label htmlFor={`question_${q.id}`} className="font-semibold block mb-1">
                 {q.question_text}
               </label>
 
@@ -376,6 +376,7 @@ const TakeSurvey: React.FC = () => {
 
               {q.question_type === "short_answer" && (
                 <input
+                  id={`question_${q.id}`}
                   type="text"
                   className="w-full border rounded p-2"
                   value={answers[q.id] || ""}
@@ -385,6 +386,7 @@ const TakeSurvey: React.FC = () => {
 
               {q.question_type === "date" && (
                 <input
+                  id={`question_${q.id}`}
                   type="date"
                   className="w-full border rounded p-2"
                   value={answers[q.id] || ""}
@@ -394,6 +396,7 @@ const TakeSurvey: React.FC = () => {
 
               {q.question_type === "dropdown" && (
                 <select
+                  id={`question_${q.id}`}
                   className="w-full border rounded p-2"
                   value={answers[q.id] || ""}
                   onChange={(e) => handleAnswerChange(q.id, e.target.value)}

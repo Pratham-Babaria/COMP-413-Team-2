@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.9a4a80fb.css",
+    "main.js": "/static/js/main.e363235d.js",
+    "static/media/dermiq.png": "/static/media/dermiq.6e92a02390aa80a42b84.png",
+    "index.html": "/index.html",
+    "main.9a4a80fb.css.map": "/static/css/main.9a4a80fb.css.map",
+    "main.e363235d.js.map": "/static/js/main.e363235d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9a4a80fb.css",
+    "static/js/main.e363235d.js"
+  ]
+}
