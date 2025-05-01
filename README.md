@@ -1,6 +1,24 @@
-# Getting Started with Create React App
+# Running the ML Model
+Required installations:
+pip install fastapi
+pip install pydantic
+pip install sqlalchemy
+pip install tensorflow
+pip install pandas
+pip install tensorflow_decision_forests
+pip install requests
+pip install sklearn.model_selection
+pip install fastapi.middleware.cors
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+start ML model API with this command (needs to be running locally when the web-app is used):
+python3 -m uvicorn ML.model_api:app --reload
+
+# Frontend Deployment
+https://comp-413-team-2.onrender.com
+
+# Backend Deployment
+postgresql://isurvey_db_3tan_user:hBpq5F5H3K4IFK2csGbIGBkncMK0Pibp@dpg-d0785rruibrs73f8jttg-a.oregon-postgres.render.com/isurvey_db_3tan
+
 
 ## Available Scripts
 
