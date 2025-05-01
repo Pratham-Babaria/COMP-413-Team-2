@@ -14,10 +14,12 @@ start ML model API with this command (needs to be running locally when the web-a
 python3 -m uvicorn ML.model_api:app --reload
 
 # Frontend Deployment
-https://comp-413-team-2.onrender.com
+https://comp-413-team-2-mu.vercel.app/
 
 # Backend Deployment
 postgresql://isurvey_db_3tan_user:hBpq5F5H3K4IFK2csGbIGBkncMK0Pibp@dpg-d0785rruibrs73f8jttg-a.oregon-postgres.render.com/isurvey_db_3tan
+
+https://comp-413-team-2.onrender.com
 
 
 ## Available Scripts
